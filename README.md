@@ -8,12 +8,6 @@ JiuCuo is under the Artistic License 2.0.
 
 ## Short manual
 
-- [Requirements](#1.System requirements)
-- [Installation](#2.Installation)
-- [Inputs](#3.Inputs)
-- [Using](#4.Using JiuCuo)
-- [Outputs](#5.Outputs)
-
 ### 1. System requirements
 JiuCuo is suitable for 32-bit or 64-bit machines with Linux operating systems. JiuCuo include minimap2 alignment, samtools processing and error correction, where the former two steps require relatively large memory, and the later uses no more than 10 GB.
 
