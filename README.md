@@ -16,7 +16,7 @@ JiuCuo is suitable for 32-bit or 64-bit machines with Linux operating systems. J
 
 ### 2. Installation
 ```sh
-git clone -d master https://github.com/bbbj001/jiucuo.git
+git clone https://github.com/bbbj001/jiucuo.git
 cd jiucuo
 conda env create -f JiuCuo.yml
 pip install -r JiuCuo.txt
