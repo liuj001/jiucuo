@@ -8,10 +8,10 @@ JiuCuo is under the Artistic License 2.0.
 
 ## Short manual
 
-- [Systemrequirements](#1.System requirements)
+- [Requirements](#1.System requirements)
 - [Installation](#2.Installation)
 - [Inputs](#3.Inputs)
-- [UsingJiuCuo](#4.Using JiuCuo)
+- [Using](#4.Using JiuCuo)
 - [Outputs](#5.Outputs)
 
 ### 1. System requirements
