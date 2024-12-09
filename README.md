@@ -1,30 +1,6 @@
 # JiuCuo
 
 ## Overview
-JiuCuo is a PacBio HiFi read correction algorithm using preassembled primary contigs based on deep image processing.
-
-## Copy right
-JiuCuo is under the Artistic License 2.0.
-
-## Short manual
-
-### 1. System requirements
-JiuCuo is suitable for 32-bit or 64-bit machines with Linux operating systems. JiuCuo include minimap2 alignment, samtools processing and error correction, where the former two steps require relatively large memory, and the later uses no more than 10 GB.
-
-### 2. Installation
-  git clone -d master https://github.com/bbbj001/jiucuo.git
-  cd jiucuo
-  conda env create -f JiuCuo.yml
-  pip install -r JiuCuo.txt
-
-
-### 3. Inputs
-- HiFi reads in FASTQ format
-- Preassembled primary contigs from the reads in FASTA format
-
-# JiuCuo
-
-## Overview
 
 JiuCuo is a PacBio HiFi read correction algorithm using preassembled primary contigs based on deep image processing.
 
