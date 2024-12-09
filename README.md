@@ -33,32 +33,43 @@ python runJiuCuo.py -reads hifi_reads.fastq -contigs primary_contigs.fasta -outp
 #### Mandatory:
 `-reads`
   Raw HiFi reads in FASTQ format
+
 `-contigs`
   Preassembled primary contigs from the reads in FASTA format
+
 `-output`
   Output directory
 
 #### Options (default value):
 `-min_bases n (1)`
   Minumum number of mismatched bases required to generate an error candidate image
+
 `-min_reads n (3)`
   Minimum number of reads required to generate the error candidate image
 
+
 `-diameter_size n (100)`
   Maximum diameter size in DBSCAN
+
 `-cluster_size n (3)`
   Minumum cluster size in DBSCAN
+
 `-k_size n (8)`
   Size of k-mer in adapter matching
+
 `-identity_value n (0.7)`
   Identity value in adapter matching
 
+
 `-adaptor_removal (no)`
   Adapter removal from the reads
+
 `-threads n (8)`
   Number of threads during correction
+
 `-allocated_reads n (20000)`
   Maximum number of reads allocated to each thread
+
 `-log (no)`
   System log to print.
 
