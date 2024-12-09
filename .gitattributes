@@ -1,4 +1,2 @@
-/root/autodl-tmp/bbbj001/inception/weight/inceptionv4.pth filter=lfs diff=lfs merge=lfs -text
-/root/autodl-tmp/bbbj001/yolo/process/best.pt filter=lfs diff=lfs merge=lfs -text
 yolo/process/best.pt filter=lfs diff=lfs merge=lfs -text
 inception/weight/inceptionv4.pth filter=lfs diff=lfs merge=lfs -text
