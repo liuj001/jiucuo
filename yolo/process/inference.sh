@@ -1,0 +1,1 @@
+python single_inference.py
