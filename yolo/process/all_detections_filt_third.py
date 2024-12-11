@@ -9,10 +9,24 @@ import csv
 import pysam
 import argparse
 from collections import Counter
-# need detection_result.csv
+# # detection_result.csv is needed for the processing
+
+
 
 
 def find_substring_indices(long_string, string_array,window_size):
+    """
+    This function finds all occurrences of substrings in a given long string.
+    The substrings should be of the specified window_size and present in string_array.
+
+    Args:
+    long_string (str): The string in which we want to find the substrings.
+    string_array (list): List of substrings to search for.
+    window_size (int): The length of each substring to find.
+
+    Returns:
+    dict: A dictionary where the key is the substring, and the value is a list of indices where the substring is found.
+    """
     substring_indices = {}
     substring_length = window_size
     for i in range(len(long_string) - substring_length + 1):
@@ -25,25 +39,37 @@ def find_substring_indices(long_string, string_array,window_size):
 
 
 def process_dict(input_dict):
-    # 将字典的值转换为数组列表
+    """
+    This function processes a dictionary of lists of indices.
+    It merges consecutive indices and returns a flattened list of non-consecutive indices.
+
+    Args:
+    input_dict (dict): Dictionary with lists of indices.
+
+    Returns:
+    list: A list of processed indices.
+    """
+    # Convert the values of the dictionary into an array list
     array_list = list(input_dict.values())
 
-    # 初始化结果数组
+    # Initialize the result array
     result = []
 
     for i in range(len(array_list)):
         current_array = array_list[i]
         if i == 0:
-            # 第一个数组直接选择第一个数字
+             # For the first array, directly append the first element
             result.append(current_array[0])
         else:
             previous = result[-1]
             found = False
+            # Merge consecutive numbers
             for num in current_array:
                 if num == previous + 1:
                     result.append(num)
                     found = True
                     break
+            # If no consecutive numbers found, select the smallest number greater than the previous one
             if not found:
                 for num in current_array:
                     if num > previous:
@@ -54,6 +80,16 @@ def process_dict(input_dict):
 
 
 def calculate_result(window_size, arr):
+    """
+    This function calculates a result value based on the distances between consecutive elements in the list `arr`.
+
+    Args:
+    window_size (int): The size of the window to calculate over.
+    arr (list): A list of indices or distances to process.
+
+    Returns:
+    int: The calculated result based on the conditions.
+    """
     result = 0
     n = len(arr)
     for i in range(n):
@@ -67,6 +103,18 @@ def calculate_result(window_size, arr):
     return result
 
 def union_func(long_string, string_array,window_size,len):
+    """
+    This function calculates a union result based on substring matches, using previously defined helper functions.
+
+    Args:
+    long_string (str): The long string to check substrings against.
+    string_array (list): The list of substrings to check for.
+    window_size (int): The size of the window to match substrings.
+    len (int): The length used for normalizing the result.
+
+    Returns:
+    float: A rounded value of the calculated result normalized by `len`.
+    """
     indices=find_substring_indices(long_string, string_array,window_size)
     arr=process_dict(indices)
     calculated_result=calculate_result(window_size, arr)
@@ -75,6 +123,18 @@ def union_func(long_string, string_array,window_size,len):
 
 
 def contains_adapter_check(x, window_size, thresholds,new_array1,new_array2,new_array3,new_array4):
+    """
+    This function checks if the input sequence contains any adapter sequence based on pre-defined threshold values.
+
+    Args:
+    x (str): The sequence to check.
+    window_size (int): The size of the window to check.
+    thresholds (dict): A dictionary of thresholds for the various adapter arrays.
+    new_array1, new_array2, new_array3, new_array4 (list): The pre-processed adapter sequences.
+    
+    Returns:
+    bool: Returns True if an adapter sequence is found; otherwise, False.
+    """
 
     for new_array, threshold in thresholds.items():
         count=0
@@ -101,19 +161,23 @@ def contains_adapter_check(x, window_size, thresholds,new_array1,new_array2,new_
     return False
 
 def base_all_detections1(openfile,bam_filename):
-    out_file = open(f'{openfile}_pre_adapter_out_all_detections.csv','w')
-    # 使用 pandas 读取 CSV 文件为 DataFrame  
-    # df1 = pd.read_csv(f'{openfile}_p.csv')  
-    df1 = pd.read_csv(f'{openfile}_p.csv')  
+    """
+    This function processes the BAM file and matches the sequences from the CSV file to identify reads containing adapter sequences.
+    
+    Args:
+    openfile (str): The input file to process.
+    bam_filename (str): The BAM file containing the sequence reads.
 
+    Returns:
+    pd.DataFrame: A DataFrame containing rows with detected adapter sequences.
+    """
+    out_file = open(f'{openfile}_pre_adapter_out_all_detections.csv','w')
+    df1 = pd.read_csv(f'{openfile}_p.csv')  
     df1.sort_values(by='trueY1', ascending=True,inplace=True)  
- 
-  
     df1.to_csv(f'{openfile}_p_sorted_file.csv', index=True)
     with open(f'{openfile}_p_sorted_file.csv','r') as in_file:
         reader = csv.reader(in_file)
-        rows = list(reader)
-      
+        rows = list(reader)   
     writer = csv.writer(out_file)
     rows[0].append('read_seq')
     writer.writerow(rows[0])
@@ -124,8 +188,7 @@ def base_all_detections1(openfile,bam_filename):
         """ if bam.pos == 60586:
             print(bam.cigar)
             break """
-        while bam.query_name == rows[tmp][18]:
-            
+        while bam.query_name == rows[tmp][18]:         
             row = rows[tmp]
             start = int(row[10])
             r2 = row[2].split('-')
@@ -146,9 +209,9 @@ def base_all_detections1(openfile,bam_filename):
                     locat += ci[1]
                 if locat >= truex1 - bam.pos:
                     break
-            if truex1 - bam.pos <= 1:#头
+            if truex1 - bam.pos <= 1:# Head of the sequence
                 count -= 45
-            elif truex2-bam.pos >= locat + 30:#尾
+            elif truex2-bam.pos >= locat + 30:#Tail of the sequence
                 count += 1
             truex1 += count
             truex2 += count
@@ -173,13 +236,23 @@ def base_all_detections1(openfile,bam_filename):
             break
 
 def ATGCFiltDetections1(openfile,similarity,k_size):
-    # 读取CSV文件
-    df = pd.read_csv(f'{openfile}_pre_adapter_out_all_detections.csv')
+    """
+    This function performs detection on adapter sequences based on similarity and k-mer size,
+    filtering sequences based on the presence of adapter sequences.
 
-    # 定义四种adapter序列
+    Args:
+    openfile (str): The input file to process.
+    similarity (float): The threshold similarity value for detecting adapter sequences.
+    k_size (int): The window size for matching adapter sequences.
+
+    Returns:
+    pd.DataFrame: A DataFrame containing rows with detected adapter sequences.
+    """
+    df = pd.read_csv(f'{openfile}_pre_adapter_out_all_detections.csv')
+    # Define the adapter sequences
     adapter_sequences = ['ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT', 'AAAAAAAAAAAAAAAAAATTAACGGAGGAGGAGGA',
                          'ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT', 'TCCTCCTCCTCCGTTAATTTTTTTTTTTTTTTTTT']
-    # adapter_sequences_houxuan= [, , , ]
+    # Prepare the arrays for each adapter sequence
     new_array1 = []
     new_array2 = []
     new_array3 = []
@@ -200,16 +273,11 @@ def ATGCFiltDetections1(openfile,similarity,k_size):
     sequence3 = adapter_sequences[3]
     for i in range(len(sequence3) - window +1):
         new_array4.append(sequence3[i:i + window])
-
+    # Apply the adapter check for each sequence
     df['read_seq'] = df['read_seq'].astype(str)
-    
-
-
 
     thresholds = {'new_array1':similarity, 'new_array2':similarity, 'new_array3':similarity, 'new_array4':similarity}
-    window_size = 8
-
-
+    window_size = k_size
     size=45
     df['contains_adapter'] = df['read_seq'].apply(
     lambda seq: any(
@@ -225,6 +293,7 @@ def ATGCFiltDetections1(openfile,similarity,k_size):
         for sub_seq in [seq[i:i+size1] for i in range(len(seq) - size1 + 1)]
     )
     )
+    # Filter and save rows containing adapter sequences
 
     adapter_rows = df[df['contains_adapter'] == True]
     adapter_rows1 = df[df['contains_adapter'] == True]
@@ -240,17 +309,11 @@ def ATGCFiltDetections1(openfile,similarity,k_size):
 
     combined_data = pd.concat([data_to_save1, data_to_save])
     combined_data = combined_data.drop_duplicates(subset=['image_id', 'x1'])
-    
+    # Save the final result
     combined_data.to_csv(f'{openfile}_{file_name}',index=False)
     openfile=openfile[8:-4]
     if not combined_data.empty:
         combined_data.to_csv(f'../result/{openfile}_{file_name}',index=False)
-    print(f'../result/{openfile}_{file_name}')
-    
-    
-    
- 
-
     return adapter_rows
 
 
