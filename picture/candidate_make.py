@@ -1,6 +1,6 @@
 import os #生成候选文件
 
-def candidate_make(chr,txt_dir, bcf_txt_dir):
+def candidate_make(chr,txt_dir, bcf_txt_dir, min_bases, min_reads):
     out_file2 = open(bcf_txt_dir+'/'+chr+'.bcf.txt','w') #候选txt文件
     with open(txt_dir+'/'+chr+'.txt','r') as f: #原txt文件
         for line in f:
@@ -27,7 +27,7 @@ def candidate_make(chr,txt_dir, bcf_txt_dir):
                         base_num -= 1
                     j = i
                 #if (base_num <= 3 and num >= 2) or (base_num > 3 and num >= base_num/3 ) : #2024/04/18改动
-                if (base_num >= 5 and num >= base_num/3 ):
+                if (base_num >= min_reads and num >= min_bases):
                 #if (base_num >= 10 and num >= base_num/3 ):
                 #if (base_num >= 15 and num >= base_num/3 ):
                     line1 = ''.join(line_arr[0])
