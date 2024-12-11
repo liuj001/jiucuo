@@ -15,8 +15,14 @@ JiuCuo is under the Artistic License 2.0.
 JiuCuo is suitable for 32-bit or 64-bit machines with Linux operating systems. JiuCuo include minimap2 alignment, samtools processing and error correction, where the former two steps require relatively large memory, and the later uses no more than 10 GB.
 
 ### 2. Installation
+Please ensure that Git LFS is installed. If it is not installed, please follow the steps below to install it:
 ```sh
-git clone https://github.com/bbbj001/jiucuo.git
+sudo apt update
+sudo apt install git-lfs
+git lfs install
+```
+```sh
+git clone https://github.com/liuj001/jiucuo.git
 cd jiucuo
 conda env create -f JiuCuo.yml
 pip install -r JiuCuo.txt
@@ -47,7 +53,6 @@ python runJiuCuo.py -reads hifi_reads.fastq -contigs primary_contigs.fasta -outp
 `-min_reads n (3)`
   Minimum number of reads required to generate the error candidate image
 
-
 `-diameter_size n (100)`
   Maximum diameter size in DBSCAN
 
@@ -60,19 +65,16 @@ python runJiuCuo.py -reads hifi_reads.fastq -contigs primary_contigs.fasta -outp
 `-identity_value n (0.7)`
   Identity value in adapter matching
 
-
 `-adaptor_removal (no)`
   Adapter removal from the reads
 
 `-threads n (8)`
   Number of threads during correction
 
-`-allocated_reads n (20000)`
+`-allocated_reads n (10000)`
   Maximum number of reads allocated to each thread
 
-`-log (no)`
-  System log to print.
 
 ### 5. Outputs
--Corrected HiFi reads
+- Corrected HiFi reads
 
