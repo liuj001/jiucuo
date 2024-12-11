@@ -6,6 +6,8 @@ from time import *
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 import subprocess
+import sys
+import logging
 
 from picture.add_pos import add_pos
 from picture.Ex_k2_adapter_ver2 import adapter_pic
@@ -17,25 +19,27 @@ from correction.read_locate_indel_v5 import correct
 
 import glob
 
-parser=argparse.ArgumentParser(description='error_correct.py integrates the processes of error correction.')
+parser=argparse.ArgumentParser(description='runJiuCuo.py integrates the processes of error correction.')
 parser.add_argument('-contigs',type=str,help='Preassembled primary contigs from the reads in FASTA format',required=True)
 parser.add_argument('-reads',type=str,help='Raw HiFi reads in FASTQ format',required=True)
 parser.add_argument('-output',type=str,help='Output directory',required=True)
 parser.add_argument('-min_bases',type=int,help='Minumum number of mismatched bases required to generate an error candidate image',default=1)
 parser.add_argument('-min_reads',type=int,help='Minimum number of reads required to generate the error candidate image',default=3)
-parser.add_argument('-diameter_size',type=int,help='Maximum diameter size in DBSCAN',default=100)
-parser.add_argument('-cluster_size',type=int,help='Minumum cluster size in DBSCAN',default=3)
-parser.add_argument('-k_size',type=int,help='Size of k-mer in adapter matching',default=8)
-parser.add_argument('-identity_value',type=float,help='Identity value in adapter matching',default=0.7)
+#parser.add_argument('-diameter_size',type=int,help='Maximum diameter size in DBSCAN',default=100)
+#parser.add_argument('-cluster_size',type=int,help='Minumum cluster size in DBSCAN',default=3)
+#parser.add_argument('-k_size',type=int,help='Size of k-mer in adapter matching',default=8)
+#parser.add_argument('-identity_value',type=float,help='Identity value in adapter matching',default=0.7)
 parser.add_argument('-threads',type=int,help='Number of threads during correction',default=8)
-parser.add_argument('-allocated_reads',type=int,help='Maximum number of reads allocated to each thread',default=20000)
-parser.add_argument('--adaptor_removal',default=False,action="store_true",help='Adapter removal from the reads')
+parser.add_argument('-allocated_reads',type=int,help='Maximum number of reads allocated to each thread',default=10000)
+#parser.add_argument('--adaptor_removal',default=False,action="store_true",help='Adapter removal from the reads')
 args=parser.parse_args()
 
 
 ref = args.contigs
 reads_path = args.reads
 outdir = args.output
+min_bases = args.min_bases
+min_reads = args.min_reads
 thread = args.threads
 allocated_reads = args.allocated_reads
 bam = outdir+'/raw.bam'
@@ -52,14 +56,23 @@ c_reads_dir = outdir+'/c_reads'
 '''make outdir'''
 if not os.path.exists(outdir):
     os.makedirs(outdir)
+if not os.path.exists(bam_dir):
     os.makedirs(bam_dir)
+if not os.path.exists(txt_dir):
     os.makedirs(txt_dir)
+if not os.path.exists(txt_add_dir):
     os.makedirs(txt_add_dir)
+if not os.path.exists(bcf_txt_dir):
     os.makedirs(bcf_txt_dir)
+if not os.path.exists(snp_c_dir):
     os.makedirs(snp_c_dir)
+if not os.path.exists(adapter_dir):
     os.makedirs(adapter_dir)
+if not os.path.exists(snp_dir):
     os.makedirs(snp_dir)
+if not os.path.exists(ec_dir):
     os.makedirs(ec_dir)
+if not os.path.exists(c_reads_dir):
     os.makedirs(c_reads_dir)
 
 
@@ -67,13 +80,14 @@ def error_correct(chr):
     start = time()
     chr = chr.rstrip('.bam')
     reads_dir_path = c_reads_dir+'/'+chr+'.ec.fastq.gz'
-   
+    #adapter_pic_dir = adapter_dir+'/'+chr
     if not os.path.exists(reads_dir_path):
         if not os.path.exists(bam_dir+'/'+chr+'.bam.bai'):
             bai_cmd = "samtools index %s/%s.bam %s/%s.bam.bai"%(bam_dir, chr, bam_dir, chr)
             bai_p=subprocess.Popen(bai_cmd,shell=True)
             bai_code=bai_p.wait()  #等待子进程结束，并返回状态码;
-            
+            #samtools index -@ 48 -b /root/autodl-tmp/HG002/old/HG002.raw.sort.filt.bam
+            #os.system("samtools index {out}/{chr}.bam {out}/{chr}.bam.bai".format(out=bam_dir,chr=chr))
         if not os.path.exists(txt_dir+'/'+chr+'.txt'):
             txt_cmd = "samtools mpileup -d 100000 -Q 0 -f %s %s/%s.bam > %s/%s.txt"%(ref, bam_dir, chr, txt_dir, chr)
             txt_p=subprocess.Popen(txt_cmd,shell=True)
@@ -88,11 +102,9 @@ def error_correct(chr):
             print(chr,"done!", f'time: {end - start:.3f}s.=========================')
         else:  
             print(chr,"make candidate =========================")  
-            candidate_make(chr, txt_dir, bcf_txt_dir)
+            candidate_make(chr, txt_dir, bcf_txt_dir, min_bases, min_reads)
             bcf_file = bcf_txt_dir + '/' + chr + '.bcf.txt'
-           
             szbcf = os.path.getsize(bcf_file)
-           
             if not szbcf:
                 print(chr,"has no snp candidate")
             else:
@@ -120,8 +132,8 @@ def spilt(chr):
             bam_cmd = "samtools view -@ 12 -b %s/filt.bam %s > %s/%s.bam"%(outdir, chr, bam_dir, chr)
             bam_p=subprocess.Popen(bam_cmd,shell=True)
             bam_code=bam_p.wait()  #等待子进程结束，并返回状态码;
-
-        split_size=allocated_reads
+            #samtools view -@ 12 -b test.bam chr1 > chr1.bam
+        split_size = allocated_reads
         # 打开输入 BAM 文件
         input_bam = bam_dir+'/'+chr+'.bam'
         bamfile = pysam.AlignmentFile(input_bam, "rb")
@@ -155,6 +167,7 @@ def spilt(chr):
             current_bam_writer.close()
 
         bamfile.close()
+        #print(f"Total {split_counter} BAM files created.")
     
     os.remove(input_bam)
     end = time()
@@ -167,40 +180,28 @@ def main():
         print("faidx")
         os.system("samtools faidx {ref}".format(ref=ref))
         print("Done!")
-    if not os.path.exists(outdir+'/raw.bam'):
-        print("Generate bam")
-        sam = outdir+'/raw.sam'
-        minimap2_command = [
-            "minimap2", "-t32"
-            "-ax", "map-hifi", 
-            ref, reads_path,
-            "-o", sam
-            ]
-            # 执行命令并捕获输出
-        raw_p = subprocess.run(minimap2_command, capture_output=True, text=True)
-        raw_code=raw_p.wait()
-        bam_cmd = "samtools view -@ 48 -bS %s/raw.sam > %s/raw.bam"%(outdir,outdir)
-        bam_p=subprocess.Popen(bam_cmd,shell=True)
-        bam_code=bam_p.wait()  #等待子进程结束，并返回状态码；
-        print("Done!")
+    #samtools faidx /root/autodl-tmp/HG002/hifiasm/m64012_190920_173625.raw.bp.p_ctg.fa
     if not os.path.exists(outdir+'/sort.bam'):
         print("Sort bam")
         sort_cmd = "samtools sort -@ 48 %s > %s/sort.bam"%(bam,outdir)
         sort_p=subprocess.Popen(sort_cmd,shell=True)
         sort_code=sort_p.wait()  #等待子进程结束，并返回状态码；
         print("Done!")
+    #samtools sort -@ 48 -o /root/autodl-tmp/test/A.tha_hifiasm/CRR302668.asm.sort.bam /root/autodl-tmp/test/A.tha_hifiasm/CRR302668.asm.bam
     if not os.path.exists(outdir+'/filt.bam'):
         print("Filt bam")
         filt_cmd = "samtools view -@ 48 -b -F 4 -F 256 -F 2048 %s/sort.bam > %s/filt.bam"%(outdir,outdir)
         filt_p=subprocess.Popen(filt_cmd,shell=True)
         filt_code=filt_p.wait()  #等待子进程结束，并返回状态码；
         print("Done!")
+    #samtools view -@ 48 -b -F 4 -F 256 -F 2048 /root/autodl-tmp/HG002/m64012_190920_173625.raw.sort.bam > /root/autodl-tmp/HG002/m64012_190920_173625.raw.sort.filt.bam
     if not os.path.exists(outdir+'/filt.bam.bai'):
         print("Index bam")
         bai_cmd = "samtools index %s/filt.bam %s/filt.bam.bai"%(outdir,outdir)
         bai_p=subprocess.Popen(bai_cmd,shell=True)
         bai_code=bai_p.wait()  #等待子进程结束，并返回状态码;
         print("Done!")
+    #samtools index -@ 48 -b /root/autodl-tmp/HG002/old/HG002.raw.sort.filt.bam
     split_cmd = "samtools view -H %s | cut -f 2 | grep SN | cut -f 2 -d \":\" > %s/chr.txt"%(bam,txt_dir)
     os.system(split_cmd) #得到该bam文件的所有染色体号
 
@@ -212,6 +213,8 @@ def file_filter(f):
 
 if __name__ == '__main__':
     start = time()
+    log_file = open(outdir+"/output.log", "w")
+    sys.stdout = log_file
     main()
     end_bam = time()
     print(f'==============================Filt bam: {end_bam - start:.3f}s.==============================')
@@ -241,11 +244,13 @@ if __name__ == '__main__':
 
     print("Find common====================")
     com_cmd = "seqkit common %s %s/reads_c.fastq.gz | seqkit seq -n -i -o %s/common.txt"%(reads_path, outdir, outdir)
+    #seqkit common file*.fa | seqkit seq -n -i -o common.txt
     com_p=subprocess.Popen(com_cmd,shell=True)
     com_code=com_p.wait()
 
     print("Remove====================")
     rem_cmd = "seqkit grep -v -f %s/common.txt %s -o %s/s.fastq.gz"%(outdir, reads_path, outdir)
+    #seqkit grep -v -f common.txt a.fa -o common.txt
     rem_p=subprocess.Popen(rem_cmd,shell=True)
     rem_code=rem_p.wait()
 
@@ -254,6 +259,7 @@ if __name__ == '__main__':
 
     print("Cat====================")
     end_cmd = "cat %s/s.fastq.gz %s/reads_c.fastq.gz > %s/correction.fastq.gz"%(outdir, outdir, outdir)
+    #cat Sample_test_1.R1.fastq.gz Sample_test_2.R2.fastq.gz > test2.fastq.gz
     end_p=subprocess.Popen(end_cmd,shell=True)
     end_code=end_p.wait()
 
@@ -265,3 +271,6 @@ if __name__ == '__main__':
     end = time()
     print(f'==============================Total time: {end - start_read:.3f}s.==============================')
     print(f'==============================Total time: {end - start:.3f}s.==============================')
+
+    log_file.close()
+    sys.stdout = sys.__stdout__ 
