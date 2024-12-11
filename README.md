@@ -25,7 +25,6 @@ git lfs install
 git clone https://github.com/liuj001/jiucuo.git
 cd jiucuo
 conda env create -f JiuCuo.yml
-pip install -r JiuCuo.txt
 ```
 ### 3. Inputs
 - HiFi reads in FASTQ format
