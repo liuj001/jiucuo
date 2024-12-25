@@ -25,15 +25,10 @@ parser.add_argument('-reads',type=str,help='Raw HiFi reads in FASTQ format',requ
 parser.add_argument('-output',type=str,help='Output directory',required=True)
 parser.add_argument('-min_bases',type=int,help='Minumum number of mismatched bases required to generate an error candidate image',default=1)
 parser.add_argument('-min_reads',type=int,help='Minimum number of reads required to generate the error candidate image',default=3)
-#parser.add_argument('-diameter_size',type=int,help='Maximum diameter size in DBSCAN',default=100)
-#parser.add_argument('-cluster_size',type=int,help='Minumum cluster size in DBSCAN',default=3)
-#parser.add_argument('-k_size',type=int,help='Size of k-mer in adapter matching',default=8)
-#parser.add_argument('-identity_value',type=float,help='Identity value in adapter matching',default=0.7)
 parser.add_argument('-threads',type=int,help='Number of threads during correction',default=8)
 parser.add_argument('-allocated_reads',type=int,help='Maximum number of reads allocated to each thread',default=10000)
-#parser.add_argument('--adaptor_removal',default=False,action="store_true",help='Adapter removal from the reads')
+parser.add_argument('-adaptor_removal',type=int,help='Adapter removal from the reads',default=0)
 args=parser.parse_args()
-
 
 ref = args.contigs
 reads_path = args.reads
@@ -42,6 +37,7 @@ min_bases = args.min_bases
 min_reads = args.min_reads
 thread = args.threads
 allocated_reads = args.allocated_reads
+adaptor_removal = args.adaptor_removal
 bam = outdir+'/raw.bam'
 bam_dir = outdir+'/bam'
 txt_dir = outdir+'/txt'
@@ -49,6 +45,8 @@ txt_add_dir = outdir+'/txt_add'
 bcf_txt_dir = outdir+'/bcf_txt'
 snp_c_dir = outdir+'/snp_candidate'
 adapter_dir = outdir+'/adapter'
+adapter_out_dir = outdir+'/adapter_out'
+adapter_re_dir = outdir+'/adapter_re'
 snp_dir = outdir+'/snp'
 ec_dir = outdir+'/ec_txt'
 c_reads_dir = outdir+'/c_reads'
@@ -68,6 +66,10 @@ if not os.path.exists(snp_c_dir):
     os.makedirs(snp_c_dir)
 if not os.path.exists(adapter_dir):
     os.makedirs(adapter_dir)
+if not os.path.exists(adapter_out_dir):
+    os.makedirs(adapter_out_dir)
+if not os.path.exists(adapter_re_dir):
+    os.makedirs(adapter_re_dir)
 if not os.path.exists(snp_dir):
     os.makedirs(snp_dir)
 if not os.path.exists(ec_dir):
@@ -80,7 +82,6 @@ def error_correct(chr):
     start = time()
     chr = chr.rstrip('.bam')
     reads_dir_path = c_reads_dir+'/'+chr+'.ec.fastq.gz'
-    #adapter_pic_dir = adapter_dir+'/'+chr
     if not os.path.exists(reads_dir_path):
         if not os.path.exists(bam_dir+'/'+chr+'.bam.bai'):
             bai_cmd = "samtools index %s/%s.bam %s/%s.bam.bai"%(bam_dir, chr, bam_dir, chr)
@@ -101,6 +102,11 @@ def error_correct(chr):
             end = time()
             print(chr,"done!", f'time: {end - start:.3f}s.=========================')
         else:  
+            if adaptor_removal==1:
+                print(chr,"make image =========================")  
+                add_pos(chr, txt_dir, txt_add_dir)
+                adapter_pic(bam_dir, txt_add_dir, adapter_dir, chr)
+            
             print(chr,"make candidate =========================")  
             candidate_make(chr, txt_dir, bcf_txt_dir, min_bases, min_reads)
             bcf_file = bcf_txt_dir + '/' + chr + '.bcf.txt'
