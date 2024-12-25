@@ -33,7 +33,7 @@ conda env create -f JiuCuo.yml
 ### 4. Using JiuCuo
 ```sh
 conda activate JiuCuo
-python runJiuCuo.py -reads hifi_reads.fastq -contigs primary_contigs.fasta -output directory [-options | -options]
+/runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output directory [-options | -options]
 ```
 #### Mandatory:
 `-reads`
