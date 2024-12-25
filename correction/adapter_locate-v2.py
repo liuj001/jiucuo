@@ -1,19 +1,33 @@
 import os
 import csv
 import pysam
-in_file = open('chr20_d70_adapter.fastq','r') #纠错后的fq文件（含义adapter）
+import argparse
 
-out_file = open('chr20_d70_adapter_remove.fastq','w') #去除adapter的fq文件
+parser=argparse.ArgumentParser(description='adapter remove.')
+parser.add_argument('-outfile',type=str,help='fq with adapter',required=True)
+parser.add_argument('-infile',type=str,help='fq',required=True)
+parser.add_argument('-csv',type=str,help='csv',required=True)
+parser.add_argument('-bam',type=str,help='bam',required=True)
+args=parser.parse_args()
+
+outfile = args.outfile
+infile = args.infile
+csv = args.csv
+bam = args.bam
+
+in_file = open(infile,'r') #纠错后的fq文件（含义adapter）
+
+out_file = open(outfile,'w') #去除adapter的fq文件
 
 lines = in_file.readlines()
 
-with open('pre_adapter_out.csv','r') as f: 
+with open(csv,'r') as f: 
     reader = csv.reader(f)
     rows = list(reader)
 del rows[0] #消除第一行
 
 tmp = 0
-bamfile = pysam.AlignmentFile('chr20_d70.bam', "rb") #bam文件
+bamfile = pysam.AlignmentFile(bam, "rb") #bam文件
 for bam in bamfile:
     if tmp == len(rows):
         print('finish',tmp)
@@ -95,4 +109,5 @@ for bam in bamfile:
     
 print(tmp)
 out_file.writelines(lines)
+
 
