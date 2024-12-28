@@ -1,15 +1,17 @@
+#!/bin/bash
 similarity=0.7
 num_threads=8
-eps=100 
-min_samples=3 
+eps=100
+min_samples=3
 k_size=8
-min_bases =1
+min_bases=1
 min_reads=3
 allocated_reads=10000
 bam="/raw.bam"
 bam_f="/filt.bam"
 adaptor_removal=0
 
+# 处理命令行参数
 while [[ $# -gt 0 ]]; do
   case $1 in
     -contigs)     
@@ -54,38 +56,44 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [ ! -d $output ]; then
-  mkdir $output
+# 创建输出目录（如果不存在）
+if [ ! -d "$output" ]; then
+  mkdir "$output"
 fi
 
-minimap2 -t32 -ax map-hifi $contigs $reads | samtools view -@ 48 -bS > $output$bam
+# 运行 minimap2 和 samtools
+minimap2 -t32 -ax map-hifi "$contigs" "$reads" | samtools view -@ 48 -bS > "$output$bam"
 
-python runJiuCuo.py -bam $output$bam -contigs $contigs -reads $reads -output $output -min_bases $min_bases -min_reads $min_reads -allocated_reads $allocated_reads -adaptor_removal $adaptor_removal
+# 运行 JiuCuo 脚本
+python runJiuCuo.py -bam "$output$bam" -contigs "$contigs" -reads "$reads" -output "$output" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
 
-num =1
+# 初始化变量
+num=1
 corr_fq="/correction.fastq.gz"
-infile=$output$corr_fq
+infile="$output$corr_fq"
 corr_a_fq="/correction_ar.fastq.gz"
-outfile=$output$corr_a_fq
+outfile="$output$corr_a_fq"
 bamview_file="/bamview-new.csv"
 process_files="/detection_results.csv"
 adapter="/adapter"
-adapter_out ="/adapter_out "
+adapter_out="/adapter_out"
 adapter_re="/adapter_re"
 
-if [ $adaptor_removal -eq $num1 ]; then
-  python  yolo/process/run.py  --bam_filename $output$bam_f \
-               --bamview_file  $output$bamview_file \
-               --process_files $output$process_files \
-               --similarity $similarity \
-               --num_threads $num_threads \
-               --eps $eps \
-               --min_samples $min_samples \
-               --k_size $k_size \
-               --images_dir $output$adapter \
-               --output_images_dir $output$adapter_out \
-               --output_detection_csv_path $output$process_files \
-               --adapter_output_dir $output$adapter_re \
+# 处理适配器移除
+if [ "$adaptor_removal" -eq "$num" ]; then
+  python yolo/process/run.py --bam_filename "$output$bam_f" \
+               --bamview_file "$output$bamview_file" \
+               --process_files "$output$process_files" \
+               --similarity "$similarity" \
+               --num_threads "$num_threads" \
+               --eps "$eps" \
+               --min_samples "$min_samples" \
+               --k_size "$k_size" \
+               --images_dir "$output$adapter" \
+               --output_images_dir "$output$adapter_out" \
+               --output_detection_csv_path "$output$process_files" \
+               --adapter_output_dir "$output$adapter_re" \
                --is_inference 1
-  python correction/adapter_locate-v2.py -bam $output$bam_f -outfile $outfile -infile $infile -csv $output$process_files
+
+  python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile "$outfile" -infile "$infile" -csv "$output$process_files"
 fi
