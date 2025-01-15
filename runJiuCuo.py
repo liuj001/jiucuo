@@ -10,7 +10,7 @@ import sys
 import logging
 
 from picture.add_pos import add_pos
-from picture.Ex_k2_adapter_ver2 import adapter_pic
+from picture.Ex_k4_adapter_ver2 import adapter_pic
 from picture.candidate_make import candidate_make
 from picture.deepvariant_speed_final_ex1 import snp_pic
 from inception.predict_a import find_snp
