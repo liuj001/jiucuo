@@ -25,6 +25,9 @@ git lfs install
 git clone https://github.com/liuj001/jiucuo.git
 cd jiucuo
 conda env create -f JiuCuo.yml
+Notes: if you can't install torch and torchvision successfully, please download from this link: https://download.pytorch.org/whl/torch_stable.html
+torch-1.8.1+cu111-cp38-cp38-linux_x86_64
+torchvision-0.9.1+cu111-cp38-cp38-linux_x86_64
 ```
 ### 3. Inputs
 - HiFi reads in FASTQ format
