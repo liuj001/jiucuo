@@ -1,5 +1,5 @@
 #!/bin/bash
-similarity=0.7
+identity_value=0.7
 num_threads=8
 eps=100
 min_samples=3
@@ -32,8 +32,8 @@ while [[ $# -gt 0 ]]; do
     -allocated_reads)     
       allocated_reads=$2
       shift 2 ;;
-    -similarity)     
-      similarity=$2
+    -identity_value)     
+      identity_value=$2
       shift 2 ;;
     -eps)      
       eps=$2
@@ -80,13 +80,15 @@ process_files="/detection_results.csv"
 adapter="/adapter"
 adapter_out="/adapter_out"
 adapter_re="/adapter_re"
+adapter_re_a="/adapter_re/*"
+adapter_re_af="/adapter_re_f.csv"
 
 # 处理adpater移除
 if [ "$adaptor_removal" -eq "$num" ]; then
   python yolo/process/run.py --bam_filename "$output$bam_f" \
                --bamview_file "$output$bamview_file" \
                --process_files "$output$process_files" \
-               --similarity "$similarity" \
+               --similarity "$identity_value" \
                --num_threads "$num_threads" \
                --eps "$eps" \
                --min_samples "$min_samples" \
@@ -96,6 +98,6 @@ if [ "$adaptor_removal" -eq "$num" ]; then
                --output_detection_csv_path "$output$process_files" \
                --adapter_output_dir "$output$adapter_re" \
                --is_inference 1
-
-  python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile "$outfile" -infile "$infile" -csv "$output$process_files"
+  cat "$output$adapter_re_a" > "$output$adapter_re_af"
+  python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile "$outfile" -infile "$infile" -csv "$adapter_re_af"
 fi
