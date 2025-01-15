@@ -25,9 +25,21 @@ git lfs install
 git clone https://github.com/liuj001/jiucuo.git
 cd jiucuo
 conda env create -f JiuCuo.yml
-Notes: if you can't install torch and torchvision successfully, please download from this link: https://download.pytorch.org/whl/torch_stable.html
+```
+Notes:
+- if you can't install torch and torchvision successfully, please download from this link: https://download.pytorch.org/whl/torch_stable.html
+```sh
 torch-1.8.1+cu111-cp38-cp38-linux_x86_64
 torchvision-0.9.1+cu111-cp38-cp38-linux_x86_64
+```
+- The following packages may fail to install, it is recommended to install them manually.
+```sh
+pip install pysam
+pip install lxml
+pip install matplotlib
+pip install pandas
+pip install jsonpath
+conda install -c bioconda seqkit
 ```
 ### 3. Inputs
 - HiFi reads in FASTQ format
@@ -49,31 +61,31 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
   Output directory
 
 #### Options (default value):
-`-min_bases n (1)`
+`-min_bases [int] (1)`
   Minumum number of mismatched bases required to generate an error candidate image
 
-`-min_reads n (3)`
+`-min_reads [int] (3)`
   Minimum number of reads required to generate the error candidate image
 
-`-diameter_size n (100)`
+`-diameter_size [int] (100)`
   Maximum diameter size in DBSCAN
 
-`-cluster_size n (3)`
+`-cluster_size [int] (3)`
   Minumum cluster size in DBSCAN
 
-`-k_size n (8)`
+`-k_size [int] (8)`
   Size of k-mer in adapter matching
 
 `-identity_value n (0.7)`
-  Identity value in adapter matching
+  Identity value in adapter matching.
 
 `-adaptor_removal (no)`
   Adapter removal from the reads
 
-`-threads n (8)`
+`-threads [int] (8)`
   Number of threads during correction
 
-`-allocated_reads n (10000)`
+`-allocated_reads [int] (10000)`
   Maximum number of reads allocated to each thread
 
 
