@@ -62,10 +62,12 @@ if [ ! -d "$output" ]; then
 fi
 
 # 运行 minimap2 和 samtools
-minimap2 -t32 -ax map-hifi "$contigs" "$reads" | samtools view -@ 48 -bS > "$output$bam"
+if [ ! -f "$output$bam" ]; then
+  minimap2 -t32 -ax map-hifi "$contigs" "$reads" | samtools view -@ 48 -bS > "$output$bam"
+fi
 
 # 运行 JiuCuo 脚本
-python runJiuCuo.py -bam "$output$bam" -contigs "$contigs" -reads "$reads" -output "$output" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
+python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
 
 # 初始化变量
 num=1
@@ -79,7 +81,7 @@ adapter="/adapter"
 adapter_out="/adapter_out"
 adapter_re="/adapter_re"
 
-# 处理适配器移除
+# 处理adpater移除
 if [ "$adaptor_removal" -eq "$num" ]; then
   python yolo/process/run.py --bam_filename "$output$bam_f" \
                --bamview_file "$output$bamview_file" \
