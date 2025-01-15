@@ -26,6 +26,8 @@ with open(csv,'r') as f:
     rows = list(reader)
 del rows[0] #消除第一行
 
+log_file = open(outdir+"/output.log", "a")
+sys.stdout = log_file
 tmp = 0
 bamfile = pysam.AlignmentFile(bam, "rb") #bam文件
 for bam in bamfile:
@@ -109,5 +111,5 @@ for bam in bamfile:
     
 print(tmp)
 out_file.writelines(lines)
-
-
+log_file.close()
+sys.stdout = sys.__stdout__ 
