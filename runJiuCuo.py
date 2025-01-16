@@ -113,6 +113,7 @@ def error_correct(chr):
             szbcf = os.path.getsize(bcf_file)
             if not szbcf:
                 #print(chr,"has no snp candidate")
+                nosnp=1
             else:
                 #print(chr,"pic =========================")
                 if not os.path.exists(snp_pic_dir):
