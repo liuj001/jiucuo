@@ -53,8 +53,8 @@ class GenAnnotations:
 
 #def images_make(ref):
 def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
-    log_file = open(outdir+"/output.log", "a")
-    sys.stdout = log_file
+    #log_file = open(outdir+"/output.log", "a")
+    #sys.stdout = log_file
     '''no_adapter = open('no_adapter.txt','r')
     no_adapter_list = no_adapter.readlines()
     no_adapter_list = [ ada.replace('\n','') for ada in no_adapter_list]'''
@@ -64,14 +64,14 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
     path_bam = bam_dir + '/' + chr + '.bam'
     #out_file = open('base-ver1.txt','w') 
     ## 获取reads的名称
-    print('Refrence Done!,adapter标注')
+    #print('Refrence Done!,adapter标注')
     ## 读取比对文件
     begin_txt = time()
     """ txtfile = open(path_txt,"r") 
     lines = txtfile.readlines() """
     end_txt = time()
     run_txt = end_txt-begin_txt
-    print ('txt读取时间：',run_txt)
+    #print ('txt读取时间：',run_txt)
     bcf_n = 1
     ##读取bam
     bamfile = pysam.AlignmentFile(path_bam, "rb")
@@ -106,8 +106,8 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
                     else:
                         soft_clip_f.append([tmp_b,45])
             tmp_b += 1
-    print(len(soft_clip_p))
-    print(len(soft_clip_f))
+    #print(len(soft_clip_p))
+    #print(len(soft_clip_f))
     #for row in soft_clip_p:
         #out_txt1.write(' '.join(map(str, row)) + '\n')
     #out_txt1.close()
@@ -115,7 +115,7 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
         #out_txt2.write(' '.join(map(str, row)) + '\n')
     #out_txt2.close()
     bamfile.close()
-    print('bam done')
+    #print('bam done')
     ## 以每一条参考read为一组
     '''in_file = open(path_txt,'r')
     lines = in_file.readlines()'''
@@ -123,12 +123,12 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
     with open(path_txt,'r') as lines:
         for line in lines:
            lines_len += 1 
-    print(ref + 'txt Done!')
+    #print(ref + 'txt Done!')
     num_ground = 0
     count = 0
     ref_n = 0
     begin_r = time()
-    print(ref)
+    #print(ref)
     count_prior = 0
     count_prior_10 = 0
     head = 0
@@ -144,7 +144,7 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
     flag_save = 0
     while flag == 0:
         if len(soft_clip_p) == 0 and len(soft_clip_f) == 0:
-            print('have no prior or front adapter ')
+            #print('have no prior or front adapter ')
             break
         ref_n += 1
         img_a = array([[0 for x in range(490)] for y in range(50)],dtype=uint8)      
@@ -168,7 +168,7 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
                 jump = 0#设置jump来修正txt文件中出现$而计数不对的问题
                 if count_front >= 25:
                     flag = 0
-                    print('next period',int(line_arr[1]),ref)
+                    #print('next period',int(line_arr[1]),ref)
                     break
                 if flag1 == 0:
                     count_head += 1
@@ -389,7 +389,7 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
                             head = int(line_arr[1])
                             flag1 = 1
                             if flag3 > 1:#说明结束的位置仍有多条新加的read
-                                print('flas为',flag3)
+                                #print('flas为',flag3)
                                 pos = flag3
                                 count_jump_head -= count_jump_head_tempory
                             
@@ -603,7 +603,7 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
                 ## 每200个碱基生成一张图        
                 #count_front为$计数，
                 if count_front >= 25  or count == lines_len:
-                    print(head,count_head,count_jump,count_jump_head)
+                    #print(head,count_head,count_jump,count_jump_head)
                     i_name = str(img_n)
                     r_name = str(ref_n)
                     
@@ -698,7 +698,7 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
                         img.putdata(img_array)
                         end_time = time()
                         run_time = end_time-begin_time
-                        print ('图片生成时间：',run_time)
+                        #print ('图片生成时间：',run_time)
                         #img.save(path_pic + '/' + 'ref' + r_name + '-' + i_name + '.png')
                         img.save(path_pic + '/' + ref + '-' + r_name + '-' + i_name + '.png')
                         
@@ -706,13 +706,13 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
                     c = 0
             end_rr = time()
             run_rr = end_rr - begin_rr
-            print('用时',run_rr)
+            #print('用时',run_rr)
     end_r = time()
     run_r = end_r-begin_r
-    print ('本条read图片生成时间：',run_r)
-    print('一共标注了adapter',num_ground)
+    #print ('本条read图片生成时间：',run_r)
+    #print('一共标注了adapter',num_ground)
     #out_txt_done = open('test_txt/' + ref + '-done.txt','w')
     #out_txt_done.close()
     #in_file.close()
-    log_file.close()
-    sys.stdout = sys.__stdout__ 
+    #log_file.close()
+    #sys.stdout = sys.__stdout__ 
