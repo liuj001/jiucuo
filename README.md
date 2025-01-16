@@ -67,16 +67,16 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
 `-min_reads [int] (3)`
   Minimum number of reads required to generate the error candidate image
 
-`-diameter_size [int] (100)`
+`-diameter_size [int] (600)`
   Maximum diameter size in DBSCAN
 
 `-cluster_size [int] (3)`
   Minumum cluster size in DBSCAN
 
-`-k_size [int] (8)`
+`-k_size [int] (20)`
   Size of k-mer in adapter matching
 
-`-identity_value n (0.7)`
+`-identity_value n (0.5)`
   Identity value in adapter matching.
 
 `-adaptor_removal (no)`
