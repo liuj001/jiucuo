@@ -26,13 +26,13 @@ with open(csv,'r') as f:
     rows = list(reader)
 del rows[0] #消除第一行
 
-log_file = open(outdir+"/output.log", "a")
-sys.stdout = log_file
+#log_file = open(outdir+"/output.log", "a")
+#sys.stdout = log_file
 tmp = 0
 bamfile = pysam.AlignmentFile(bam, "rb") #bam文件
 for bam in bamfile:
     if tmp == len(rows):
-        print('finish',tmp)
+        #print('finish',tmp)
         break
     while bam.query_name == rows[tmp][18]:
         row = rows[tmp]
@@ -104,12 +104,13 @@ for bam in bamfile:
 
         tmp += 1
         if tmp == len(rows):
-            print('finish',tmp)
+            #print('finish',tmp)
             break
         if tmp % 100 == 0:
-            print(tmp)
+            #print(tmp)
+            now = 1
     
-print(tmp)
+#print(tmp)
 out_file.writelines(lines)
-log_file.close()
-sys.stdout = sys.__stdout__ 
+#log_file.close()
+#sys.stdout = sys.__stdout__ 
