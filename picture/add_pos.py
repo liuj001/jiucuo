@@ -11,7 +11,7 @@ def add_pos(chr, txt_dir, txt_add_dir):
             l += 1
             line_arr = line.split()
             if int(line_arr[1]) != a + 1 and a != 0:
-                print(int(line_arr[1]))
+                #print(int(line_arr[1]))
                 for i in range(int(line_arr[1]) - 1 - a):
                     line2 = []
                     line2.append(line_arr[0]+ '\t'+str(a+i+1)+'   A   1   ?   !'+'\n')
