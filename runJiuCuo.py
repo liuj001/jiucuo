@@ -100,33 +100,33 @@ def error_correct(chr):
         sz = os.path.getsize(txt_file)
         if not sz:
             end = time()
-            print(chr,"done!", f'time: {end - start:.3f}s.=========================')
+            #print(chr,"done!", f'time: {end - start:.3f}s.=========================')
         else:  
             if adaptor_removal==1:
-                print(chr,"make image =========================")  
+                #print(chr,"make image =========================")  
                 add_pos(chr, txt_dir, txt_add_dir)
                 adapter_pic(bam_dir, txt_add_dir, adapter_dir, chr)
             
-            print(chr,"make candidate =========================")  
+            #print(chr,"make candidate =========================")  
             candidate_make(chr, txt_dir, bcf_txt_dir, min_bases, min_reads)
             bcf_file = bcf_txt_dir + '/' + chr + '.bcf.txt'
             szbcf = os.path.getsize(bcf_file)
             if not szbcf:
-                print(chr,"has no snp candidate")
+                #print(chr,"has no snp candidate")
             else:
-                print(chr,"pic =========================")
+                #print(chr,"pic =========================")
                 if not os.path.exists(snp_pic_dir):
                     os.makedirs(snp_pic_dir)
                 snp_pic(bam_dir, txt_dir, bcf_txt_dir, snp_pic_dir, chr)
-                print(chr,"call snp =========================")
+                #print(chr,"call snp =========================")
                 find_snp(snp_pic_dir, snp_dir, chr)
             
-            print(chr,"find error =========================")
+            #print(chr,"find error =========================")
             find_error(ec_dir, snp_dir, txt_dir, chr)
-            print(chr,"correct error =========================")
+            #print(chr,"correct error =========================")
             correct(bam_dir, txt_dir, ec_dir, c_reads_dir, chr)
             end = time()
-            print(chr,"done!", f'time: {end - start:.3f}s.=========================')
+            #print(chr,"done!", f'time: {end - start:.3f}s.=========================')
     
     return chr
 
@@ -177,36 +177,36 @@ def spilt(chr):
     
     os.remove(input_bam)
     end = time()
-    print(chr,"spilt done!", f'time: {end - start:.3f}s.=========================') 
+    #print(chr,"spilt done!", f'time: {end - start:.3f}s.=========================') 
     
     return chr
 
 def main():
     if not os.path.exists(ref+'.fai'):
-        print("faidx")
+        #print("faidx")
         os.system("samtools faidx {ref}".format(ref=ref))
-        print("Done!")
+        #print("Done!")
     #samtools faidx /root/autodl-tmp/HG002/hifiasm/m64012_190920_173625.raw.bp.p_ctg.fa
     if not os.path.exists(outdir+'/sort.bam'):
-        print("Sort bam")
+        #print("Sort bam")
         sort_cmd = "samtools sort -@ 48 %s > %s/sort.bam"%(bam,outdir)
         sort_p=subprocess.Popen(sort_cmd,shell=True)
         sort_code=sort_p.wait()  #等待子进程结束，并返回状态码；
-        print("Done!")
+        #print("Done!")
     #samtools sort -@ 48 -o /root/autodl-tmp/test/A.tha_hifiasm/CRR302668.asm.sort.bam /root/autodl-tmp/test/A.tha_hifiasm/CRR302668.asm.bam
     if not os.path.exists(outdir+'/filt.bam'):
-        print("Filt bam")
+        #print("Filt bam")
         filt_cmd = "samtools view -@ 48 -b -F 4 -F 256 -F 2048 %s/sort.bam > %s/filt.bam"%(outdir,outdir)
         filt_p=subprocess.Popen(filt_cmd,shell=True)
         filt_code=filt_p.wait()  #等待子进程结束，并返回状态码；
-        print("Done!")
+        #print("Done!")
     #samtools view -@ 48 -b -F 4 -F 256 -F 2048 /root/autodl-tmp/HG002/m64012_190920_173625.raw.sort.bam > /root/autodl-tmp/HG002/m64012_190920_173625.raw.sort.filt.bam
     if not os.path.exists(outdir+'/filt.bam.bai'):
-        print("Index bam")
+        #print("Index bam")
         bai_cmd = "samtools index %s/filt.bam %s/filt.bam.bai"%(outdir,outdir)
         bai_p=subprocess.Popen(bai_cmd,shell=True)
         bai_code=bai_p.wait()  #等待子进程结束，并返回状态码;
-        print("Done!")
+        #print("Done!")
     #samtools index -@ 48 -b /root/autodl-tmp/HG002/old/HG002.raw.sort.filt.bam
     split_cmd = "samtools view -H %s | cut -f 2 | grep SN | cut -f 2 -d \":\" > %s/chr.txt"%(bam,txt_dir)
     os.system(split_cmd) #得到该bam文件的所有染色体号
@@ -219,11 +219,9 @@ def file_filter(f):
 
 if __name__ == '__main__':
     start = time()
-    log_file = open(outdir+"/output.log", "w")
-    sys.stdout = log_file
     main()
     end_bam = time()
-    print(f'==============================Filt bam: {end_bam - start:.3f}s.==============================')
+    #print(f'==============================Filt bam: {end_bam - start:.3f}s.==============================')
     
     start_spilt = time()
     with open(txt_dir+'/chr.txt','r') as chr_file:
@@ -232,7 +230,7 @@ if __name__ == '__main__':
         res = executor.map(spilt, chr_n)
 
     end_spilt = time()
-    print(f'==============================Split bam: {end_spilt - start_spilt:.3f}s.==============================')
+    #print(f'==============================Split bam: {end_spilt - start_spilt:.3f}s.==============================')
     
     start_error = time()
     chr_list= os.listdir(bam_dir)
@@ -240,21 +238,21 @@ if __name__ == '__main__':
     with ThreadPoolExecutor(max_workers=thread) as executor:
         res = executor.map(error_correct, chr_l)
     end_error = time()
-    print(f'==============================Correct error: {end_error - start_error:.3f}s.==============================')    
+    #print(f'==============================Correct error: {end_error - start_error:.3f}s.==============================')    
 
     start_read = time()
-    print("Get reads ====================")
+    #print("Get reads ====================")
     read_cmd = "cat %s/*.gz > %s/reads_c.fastq.gz"%(c_reads_dir, outdir) 
     read_p=subprocess.Popen(read_cmd,shell=True)
     read_code=read_p.wait()
 
-    print("Find common====================")
+    #print("Find common====================")
     com_cmd = "seqkit common %s %s/reads_c.fastq.gz | seqkit seq -n -i -o %s/common.txt"%(reads_path, outdir, outdir)
     #seqkit common file*.fa | seqkit seq -n -i -o common.txt
     com_p=subprocess.Popen(com_cmd,shell=True)
     com_code=com_p.wait()
 
-    print("Remove====================")
+    #print("Remove====================")
     rem_cmd = "seqkit grep -v -f %s/common.txt %s -o %s/s.fastq.gz"%(outdir, reads_path, outdir)
     #seqkit grep -v -f common.txt a.fa -o common.txt
     rem_p=subprocess.Popen(rem_cmd,shell=True)
@@ -263,7 +261,7 @@ if __name__ == '__main__':
     t = outdir+"/common.txt"
     os.remove(t)
 
-    print("Cat====================")
+    #print("Cat====================")
     end_cmd = "cat %s/s.fastq.gz %s/reads_c.fastq.gz > %s/correction.fastq.gz"%(outdir, outdir, outdir)
     #cat Sample_test_1.R1.fastq.gz Sample_test_2.R2.fastq.gz > test2.fastq.gz
     end_p=subprocess.Popen(end_cmd,shell=True)
@@ -275,8 +273,5 @@ if __name__ == '__main__':
     os.remove(s)
 
     end = time()
-    print(f'==============================Total time: {end - start_read:.3f}s.==============================')
-    print(f'==============================Total time: {end - start:.3f}s.==============================')
-
-    log_file.close()
-    sys.stdout = sys.__stdout__ 
+    #print(f'==============================Total time: {end - start_read:.3f}s.==============================')
+    #print(f'==============================Total time: {end - start:.3f}s.==============================')
