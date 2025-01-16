@@ -52,7 +52,7 @@ class GenAnnotations:
         ymaxn.text = str(ymax)
 
 #def images_make(ref):
-def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr)
+def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr):
     #log_file = open(outdir+"/output.log", "a")
     #sys.stdout = log_file
     '''no_adapter = open('no_adapter.txt','r')
