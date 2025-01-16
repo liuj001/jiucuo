@@ -19,14 +19,22 @@ validate_param() {
   local name=$4
   local is_integer=$5
 
+  # 检查是否为整数
   if [ "$is_integer" == "1" ]; then
     if ! [[ "$value" =~ ^[0-9]+$ ]]; then
       echo "Error: $name must be an integer."
       exit 1
     fi
+  else
+    # 浮点数检查（仅支持简单的浮点格式）
+    if ! [[ "$value" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+      echo "Error: $name must be a valid number."
+      exit 1
+    fi
   fi
 
-  if (( $(echo "$value < $min" | bc -l) || $(echo "$value > $max" | bc -l) )); then
+# 使用 awk 进行小数范围比较
+  if ! awk -v val="$value" -v min="$min" -v max="$max" 'BEGIN {exit !(val >= min && val <= max)}'; then
     echo "Error: $name must be between $min and $max."
     exit 1
   fi
