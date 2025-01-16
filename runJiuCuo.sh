@@ -98,7 +98,39 @@ if [ ! -f "$output$bam" ]; then
 fi
 
 # 运行 JiuCuo 脚本
+echo "Running JiuCuo script with progress bar..."
+total_steps=3
+current_step=0
+
+update_progress() {
+  local current=$1
+  local total=$2
+  local percent=$((current * 100 / total))
+  local filled=$((percent / 2))
+  local empty=$((50 - filled))
+  printf "\r["
+  printf "%0.s#" $(seq 1 $filled)
+  printf "%0.s-" $(seq 1 $empty)
+  printf "] %d%% (%d/%d steps)" "$percent" "$current" "$total"
+}
+
+# Step 1: Initialize
+update_progress $((++current_step)) $total_steps
+sleep 1
+
+# Step 2: Run main script
 python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
+update_progress $((++current_step)) $total_steps
+sleep 1
+
+# Step 3: Finalize
+update_progress $((++current_step)) $total_steps
+sleep 1
+
+echo -e "\nJiuCuo script completed!"
+
+# 运行 JiuCuo 脚本
+# python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
 
 # 初始化变量
 num=1
