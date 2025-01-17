@@ -4,8 +4,8 @@ threads=8
 diameter_size=600
 cluster_size=3
 k_size=8
-min_bases=1
-min_reads=3
+#min_bases=1
+#min_reads=3
 allocated_reads=10000
 bam="/raw.bam"
 bam_f="/filt.bam"
@@ -52,12 +52,6 @@ while [[ $# -gt 0 ]]; do
     -output)     
       output="$2"
       shift 2 ;;
-    -min_bases)     
-      min_bases=$2
-      shift 2 ;;
-    -min_reads)     
-      min_reads=$2
-      shift 2 ;;
     -allocated_reads)     
       allocated_reads=$2
       shift 2 ;;
@@ -91,8 +85,6 @@ validate_param "$diameter_size" 0 5000 "diameter_size" 0
 validate_param "$cluster_size" 2 10 "cluster_size" 1
 validate_param "$threads" 1 100 "threads" 1
 validate_param "$k_size" 1 30 "k_size" 1
-validate_param "$min_bases" 1 5 "min_bases" 1
-validate_param "$min_reads" 1 100 "min_reads" 1
 validate_param "$allocated_reads" 100 1000000 "allocated_reads" 1
 
 # 创建输出目录（如果不存在）
@@ -127,7 +119,7 @@ update_progress $((++current_step)) $total_steps
 sleep 1
 
 # Step 2: Run main script
-python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
+python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
 update_progress $((++current_step)) $total_steps
 sleep 1
 
