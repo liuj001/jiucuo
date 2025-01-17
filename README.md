@@ -61,12 +61,6 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
   Output directory
 
 #### Options (default value):
-`-min_bases [int] (1)`
-  Minumum number of mismatched bases required to generate an error candidate image
-
-`-min_reads [int] (3)`
-  Minimum number of reads required to generate the error candidate image
-
 `-diameter_size [int] (600)`
   Maximum diameter size in DBSCAN
 
