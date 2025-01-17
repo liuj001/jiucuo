@@ -23,8 +23,8 @@ parser=argparse.ArgumentParser(description='runJiuCuo.py integrates the processe
 parser.add_argument('-contigs',type=str,help='Preassembled primary contigs from the reads in FASTA format',required=True)
 parser.add_argument('-reads',type=str,help='Raw HiFi reads in FASTQ format',required=True)
 parser.add_argument('-output',type=str,help='Output directory',required=True)
-parser.add_argument('-min_bases',type=int,help='Minumum number of mismatched bases required to generate an error candidate image',default=1)
-parser.add_argument('-min_reads',type=int,help='Minimum number of reads required to generate the error candidate image',default=3)
+#parser.add_argument('-min_bases',type=int,help='Minumum number of mismatched bases required to generate an error candidate image',default=1)
+#parser.add_argument('-min_reads',type=int,help='Minimum number of reads required to generate the error candidate image',default=3)
 parser.add_argument('-threads',type=int,help='Number of threads during correction',default=8)
 parser.add_argument('-allocated_reads',type=int,help='Maximum number of reads allocated to each thread',default=10000)
 parser.add_argument('-adaptor_removal',type=int,help='Adapter removal from the reads',default=0)
@@ -33,8 +33,8 @@ args=parser.parse_args()
 ref = args.contigs
 reads_path = args.reads
 outdir = args.output
-min_bases = args.min_bases
-min_reads = args.min_reads
+#min_bases = args.min_bases
+#min_reads = args.min_reads
 thread = args.threads
 allocated_reads = args.allocated_reads
 adaptor_removal = args.adaptor_removal
@@ -108,7 +108,7 @@ def error_correct(chr):
                 adapter_pic(bam_dir, txt_add_dir, adapter_dir, chr)
             
             #print(chr,"make candidate =========================")  
-            candidate_make(chr, txt_dir, bcf_txt_dir, min_bases, min_reads)
+            candidate_make(chr, txt_dir, bcf_txt_dir)
             bcf_file = bcf_txt_dir + '/' + chr + '.bcf.txt'
             szbcf = os.path.getsize(bcf_file)
             if not szbcf:
