@@ -99,24 +99,30 @@ if [ ! -f "$output$bam" ]; then
 
 fi
 
+num=1
+bam_txt="/bamview.txt"
+bamview_file="/bamview-new.csv"
 # 运行 JiuCuo 脚本
+if [ "$adaptor_removal" -eq "$num" ]; then
+  samtools view $output$bam_f 2>> "$output/runJiuCuo.log" > "$output$bam_txt"
+  python picture/bamview-new.py -cvs "$output$bamview_file" -txt "$output$bam_txt"
+fi
+
 python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
 
 # 初始化变量
-num=1
 corr_fq="/correction.fastq.gz"
 infile="$output$corr_fq"
 corr_a_fq="/correction_ar.fastq.gz"
 outfile="$output$corr_a_fq"
-bamview_file="/bamview-new.csv"
-process_files="/adapter_remove.csv"
 adapter="/adapter"
 adapter_out="/adapter_out"
+process_files="/adapter_remove.csv"
 
 # 处理adpater移除
 if [ "$adaptor_removal" -eq "$num" ]; then
   python yolo/process/run.py  --bam_filename "$output$bam_f" \
-               --bamview_file "$output$adapter$bamview_file"\
+               --bamview_file "$output$bamview_file"\
                --images_dir "$output$adapter" \
                --similarity "$identity_value" \
                --num_threads "$threads" \
