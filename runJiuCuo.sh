@@ -94,25 +94,10 @@ fi
 
 # 运行 minimap2 和 samtools
 if [ ! -f "$output$bam" ]; then
-  minimap2 -t32 -ax map-hifi "$contigs" "$reads" | samtools view -@ 48 -bS > "$output$bam"
+  #minimap2 -t32 -ax map-hifi "$contigs" "$reads" | samtools view -@ 48 -bS > "$output$bam"
+  minimap2 -t32 -ax map-hifi "$contigs" "$reads" 2>> "$output/runJiuCuo.log" | samtools view -@ 48 -bS 2>> "$output/runJiuCuo.log" > "$output$bam"
+
 fi
-
-# 运行 JiuCuo 脚本
-echo "Running JiuCuo script with progress bar..."
-total_steps=3
-current_step=0
-
-update_progress() {
-  local current=$1
-  local total=$2
-  local percent=$((current * 100 / total))
-  local filled=$((percent / 2))
-  local empty=$((50 - filled))
-  printf "\r["
-  printf "%0.s#" $(seq 1 $filled)
-  printf "%0.s-" $(seq 1 $empty)
-  printf "] %d%% (%d/%d steps)" "$percent" "$current" "$total"
-}
 
 # 运行 JiuCuo 脚本
 python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
@@ -130,7 +115,7 @@ adapter_out="/adapter_out"
 
 # 处理adpater移除
 if [ "$adaptor_removal" -eq "$num" ]; then
-  python run.py  --bam_filename "$output$bam_f" \
+  python yolo/process/run.py  --bam_filename "$output$bam_f" \
                --bamview_file "$output$adapter$bamview_file"\
                --images_dir "$output$adapter" \
                --similarity "$identity_value" \
