@@ -1,9 +1,9 @@
 #!/bin/bash
-identity_value=0.7
+identity_value=0.6
 threads=8
 diameter_size=600
 cluster_size=3
-k_size=8
+k_size=20
 #min_bases=1
 #min_reads=3
 allocated_reads=10000
@@ -114,23 +114,8 @@ update_progress() {
   printf "] %d%% (%d/%d steps)" "$percent" "$current" "$total"
 }
 
-# Step 1: Initialize
-update_progress $((++current_step)) $total_steps
-sleep 1
-
-# Step 2: Run main script
-python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
-update_progress $((++current_step)) $total_steps
-sleep 1
-
-# Step 3: Finalize
-update_progress $((++current_step)) $total_steps
-sleep 1
-
-echo -e "\nJiuCuo script completed!"
-
 # 运行 JiuCuo 脚本
-# python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
+python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
 
 # 初始化变量
 num=1
@@ -139,28 +124,20 @@ infile="$output$corr_fq"
 corr_a_fq="/correction_ar.fastq.gz"
 outfile="$output$corr_a_fq"
 bamview_file="/bamview-new.csv"
-process_files="/detection_results.csv"
+process_files="/adapter_remove.csv"
 adapter="/adapter"
 adapter_out="/adapter_out"
-adapter_re="/adapter_re"
-adapter_re_a="/adapter_re/*"
-adapter_re_af="/adapter_re_f.csv"
 
 # 处理adpater移除
 if [ "$adaptor_removal" -eq "$num" ]; then
-  python yolo/process/run.py --bam_filename "$output$bam_f" \
-               --bamview_file "$output$bamview_file" \
-               --process_files "$output$process_files" \
+  python run.py  --bam_filename "$output$bam_f" \
+               --bamview_file "$output$adapter$bamview_file"\
+               --images_dir "$output$adapter" \
                --similarity "$identity_value" \
                --num_threads "$threads" \
                --eps "$diameter_size" \
-               --min_samples "$cluster_size" \
-               --k_size "$k_size" \
-               --images_dir "$output$adapter" \
-               --output_images_dir "$output$adapter_out" \
-               --output_detection_csv_path "$output$process_files" \
-               --adapter_output_dir "$output$adapter_re" \
-               --is_inference 1
-  cat "$output$adapter_re_a" > "$output$adapter_re_af"
-  python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile "$outfile" -infile "$infile" -csv "$adapter_re_af"
+               --min_samples "$cluster_size"\
+               --k_size "$k_size"\
+               --adapter_output_dir "$output$adapter_out"\
+  python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile "$outfile" -infile "$infile" -csv "$output$adapter_out$process_files"
 fi
