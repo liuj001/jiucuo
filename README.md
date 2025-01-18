@@ -70,7 +70,7 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
 `-k_size [int] (20)`
   Size of k-mer in adapter matching
 
-`-identity_value n (0.5)`
+`-identity_value n (0.6)`
   Identity value in adapter matching.
 
 `-adaptor_removal (no)`
