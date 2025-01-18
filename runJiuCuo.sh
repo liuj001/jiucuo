@@ -79,7 +79,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# 校验参数
 validate_param "$identity_value" 0 1 "identity_value" 0
 validate_param "$diameter_size" 0 5000 "diameter_size" 0
 validate_param "$cluster_size" 2 10 "cluster_size" 1
@@ -87,7 +86,6 @@ validate_param "$threads" 1 100 "threads" 1
 validate_param "$k_size" 1 30 "k_size" 1
 validate_param "$allocated_reads" 100 1000000 "allocated_reads" 1
 
-# 创建输出目录（如果不存在）
 if [ ! -d "$output" ]; then
   mkdir "$output"
 fi
@@ -102,7 +100,7 @@ fi
 num=1
 bam_txt="/bamview.txt"
 bamview_file="/bamview-new.csv"
-# 运行 JiuCuo 脚本
+
 if [ "$adaptor_removal" -eq "$num" ]; then
   samtools view $output$bam_f 2>> "$output/runJiuCuo.log" > "$output$bam_txt"
   python picture/bamview-new.py -cvs "$output$bamview_file" -txt "$output$bam_txt"
@@ -110,7 +108,6 @@ fi
 
 python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
 
-# 初始化变量
 corr_fq="/correction.fastq.gz"
 infile="$output$corr_fq"
 corr_a_fq="/correction_ar.fastq.gz"
@@ -119,7 +116,6 @@ adapter="/adapter"
 adapter_out="/adapter_out"
 process_files="/adapter_remove.csv"
 
-# 处理adpater移除
 if [ "$adaptor_removal" -eq "$num" ]; then
   python yolo/process/run.py  --bam_filename "$output$bam_f" \
                --bamview_file "$output$bamview_file"\
