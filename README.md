@@ -39,6 +39,9 @@ pip install lxml
 pip install matplotlib
 pip install pandas
 pip install jsonpath
+pip install scikit-learn
+pip install ultralytics
+pip install tqdm
 conda install -c bioconda seqkit
 ```
 ### 3. Inputs
@@ -73,8 +76,8 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
 `-identity_value n (0.6)`
   Identity value in adapter matching.
 
-`-adaptor_removal (no)`
-  Adapter removal from the reads
+`-adaptor_removal (0)`
+  Adapter removal from the reads. 0 indicates no adapter removal, while 1 indicates adapter removal.
 
 `-threads [int] (8)`
   Number of threads during correction
@@ -84,5 +87,9 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
 
 
 ### 5. Outputs
-- Corrected HiFi reads
+`correction.fastq.gz`
+ Corrected HiFi reads.
+
+`correction_ar.fastq.gz`
+ Corrected HiFi reads without adapter.
 
