@@ -2,6 +2,7 @@ import os
 import csv
 import pysam
 import argparse
+import gzip
 
 parser=argparse.ArgumentParser(description='adapter remove.')
 parser.add_argument('-outfile',type=str,help='fq with adapter',required=True)
@@ -12,16 +13,16 @@ args=parser.parse_args()
 
 outfile = args.outfile
 infile = args.infile
-csv = args.csv
+csv_f = args.csv
 bam = args.bam
 
-in_file = open(infile,'r') #纠错后的fq文件（含义adapter）
+in_file = gzip.open(infile,'r') #纠错后的fq文件（含义adapter）
 
-out_file = open(outfile,'w') #去除adapter的fq文件
+out_file = gzip.open(outfile,'w') #去除adapter的fq文件
 
 lines = in_file.readlines()
 
-with open(csv,'r') as f: 
+with open(csv_f,'r') as f: 
     reader = csv.reader(f)
     rows = list(reader)
 del rows[0] #消除第一行
@@ -55,12 +56,12 @@ for bam in bamfile:
             elif ci[0] == 2 : #如果有删除 
                 adapter_location -= ci[1]
                 count -= ci[1]
-                if(ci[1] <= 5)
+                if(ci[1] <= 5):
                     true_location += ci[1]
             elif ci[0] == 1: #如果有插入
                 adapter_location += ci[1]
                 true_location += ci[1]
-                if(ci[1] <= 5)
+                if(ci[1] <= 5):
                     true_location -= ci[1]
             if  count < 0:
                 lenth = bam.cigar[ci_tmp + 1][1]
