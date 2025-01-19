@@ -52,7 +52,7 @@ class GenAnnotations:
         ymaxn.text = str(ymax)
 
 #def images_make(ref):
-def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr):
+def adapter_pic(bam_dir, txt_add_dir, adapter_dir, chr):
     #log_file = open(outdir+"/output.log", "a")
     #sys.stdout = log_file
     '''no_adapter = open('no_adapter.txt','r')
@@ -60,8 +60,8 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr):
     no_adapter_list = [ ada.replace('\n','') for ada in no_adapter_list]'''
     ref = chr
     path_txt = txt_add_dir + '/' + ref + '_add.txt'
-    path_pic = adapter_pic
-    path_bam = bam_dir + '/' + chr + '.bam'
+    path_pic = adapter_dir
+    path_bam = bam_dir + '/' + ref + '.bam'
     #out_file = open('base-ver1.txt','w') 
     ## 获取reads的名称
     #print('Refrence Done!,adapter标注')
@@ -81,31 +81,32 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr):
     soft_clip_f = list()
     tmp_b = 0
     for bam in bamfile:
-        if bam.reference_name != ref and tmp_b > 0:
-            break
-        if bam.reference_name == ref:
-            '''if tmp_b <= 22575 and ref == 'utg0002050l':
-                pass'''
-            if tmp_b >= 0:
-                if bam.cigar[0][0] == 4:
-                    '''if (bam.query_name in no_adapter_list):
-                        no_adapter_list.remove(bam.query_name'''
-                    if bam.cigar[0][1] < 30:
-                        pass
-                    elif 45 >= bam.cigar[0][1] >= 30:
-                        soft_clip_p.append([tmp_b,bam.cigar[0][1]])
-                    else:
-                        soft_clip_p.append([tmp_b,45])
-                if bam.cigar[-1][0] ==  4 :
-                    '''if (bam.query_name in no_adapter_list):
-                        no_adapter_list.remove(bam.query_name)'''
-                    if bam.cigar[-1][1] < 30:
-                        pass
-                    elif 45 >= bam.cigar[-1][1] >= 30:
-                        soft_clip_f.append([tmp_b,bam.cigar[-1][1]])
-                    else:
-                        soft_clip_f.append([tmp_b,45])
-            tmp_b += 1
+        # if bam.reference_name != ref and tmp_b > 0:
+        #     break
+        # if bam.reference_name == ref:
+            # if tmp_b <= 22575 and ref == 'utg0002050l':
+            #     pass
+        
+        if tmp_b >= 0:
+            if bam.cigar[0][0] == 4:
+                '''if (bam.query_name in no_adapter_list):
+                    no_adapter_list.remove(bam.query_name'''
+                if bam.cigar[0][1] < 30:
+                    pass
+                elif 45 >= bam.cigar[0][1] >= 30:
+                    soft_clip_p.append([tmp_b,bam.cigar[0][1]])
+                else:
+                    soft_clip_p.append([tmp_b,45])
+            if bam.cigar[-1][0] ==  4 :
+                '''if (bam.query_name in no_adapter_list):
+                    no_adapter_list.remove(bam.query_name)'''
+                if bam.cigar[-1][1] < 30:
+                    pass
+                elif 45 >= bam.cigar[-1][1] >= 30:
+                    soft_clip_f.append([tmp_b,bam.cigar[-1][1]])
+                else:
+                    soft_clip_f.append([tmp_b,45])
+        tmp_b += 1
     #print(len(soft_clip_p))
     #print(len(soft_clip_f))
     #for row in soft_clip_p:
@@ -145,7 +146,8 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr):
     while flag == 0:
         if len(soft_clip_p) == 0 and len(soft_clip_f) == 0:
             #print('have no prior or front adapter ')
-            break
+            # break
+            pass
         ref_n += 1
         img_a = array([[0 for x in range(490)] for y in range(50)],dtype=uint8)      
         img_A = array([[0 for x in range(1471)] for y in range(901)],dtype=uint8)
@@ -206,7 +208,7 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr):
                         pass
                 # print(line_arr)
                 ## 比对到当前参考read的reads,提取比对信息
-                    elif line_arr[0] == ref:
+                    elif line_arr[0] == ref or 1 == 1:
                         
                         tmp_indel = 0
                         bases = list(line_arr[4])
@@ -429,7 +431,7 @@ def adapter_pic(bam_dir, txt_add_dir, adapter_pic, chr):
                                     basic = 0 - base
                                     if 48 >= basic >= 30:#进行标注
                                         num_ground += 1
-                                        #flag_save = 1
+                                        flag_save = 1
                                         '''xmin = ymin = xmax = ymax = 0
                                         if c > 0:
                                             if img_a[i][c-1] != 3 and c == 1: 
