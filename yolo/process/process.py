@@ -7,21 +7,23 @@ import csv
 from sklearn.cluster import DBSCAN
 from ultralytics import YOLO
 import cv2
+from tqdm import tqdm
 
 
 def images_inference(image_dir, output_image_dir, output_csv_path):
     # Load the pre-trained YOLO model
-    model = YOLO("best.pt")
+    model = YOLO("yolo/process/best.pt")
     image_paths = [os.path.join(image_dir, fname) for fname in os.listdir(image_dir) if
                    fname.endswith(('.jpg', '.png', '.jpeg'))]
+
     # Output directory to save results
-    os.makedirs(output_image_dir, exist_ok=True)  # 如果目录不存在，则创建
+    os.makedirs(output_image_dir, exist_ok=True)
 
     # Store detection results
     all_results = []
 
-    # Process each image in the image directory
-    for image_path in image_paths:
+    # Use tqdm to show a progress bar for the loop
+    for image_path in tqdm(image_paths, desc="Processing images", unit="image"):  # Add tqdm progress bar
         result = model(image_path, verbose=False)  # Run inference on a single image
         image_name = os.path.basename(image_path)
         boxes = result[0].boxes
@@ -34,27 +36,31 @@ def images_inference(image_dir, output_image_dir, output_csv_path):
                 class_name = model.names[class_id]
                 all_results.append([image_name, x1, y1, x2, y2, confidence, class_id, class_name])
 
-        # save images
-        output_image_path = os.path.join(output_image_dir, image_name)
-        annotated_image = result[0].plot()
-        cv2.imwrite(output_image_path, annotated_image)
+        # Save images
+        # output_image_path = os.path.join(output_image_dir, image_name)
+        # annotated_image = result[0].plot()
+        # cv2.imwrite(output_image_path, annotated_image)
 
-        # Save the generated annotated image
+    # Save detection results to a CSV file
     df = pd.DataFrame(all_results,
                       columns=["image_id", "x1", "y1", "x2", "y2", "confidence", "hard_score", "Class Name"])
     new_df = df.iloc[:, :7]
-
     new_df.to_csv(output_csv_path, index=False, encoding="utf-8-sig")
 
     print(f"Detection results saved to {output_csv_path}")
-    print(f"Annotated images saved in {output_image_dir}")
+    # print(f"Annotated images saved in {output_image_dir}")
 
 
-def process_image_name(process_image_name_file = "../data/detection_results.csv"):
+def process_image_name(process_image_name_file="../data/detection_results.csv"):
     # remove ptg* files
     process_image_name_dir = os.path.dirname(process_image_name_file)
-    for file in glob.glob(os.path.join(process_image_name_dir, "ptg*")):
-        os.remove(file)
+    for filename in os.listdir(process_image_name_dir):
+        if filename.endswith('_data.csv'):
+            a = str(process_image_name_dir) + str('/') + str(filename)
+            os.remove(a)
+
+    # for file in glob.glob(os.path.join(process_image_name_dir, "chr*")):
+    #     os.remove(file)
     df = pd.read_csv(process_image_name_file)
     # Extract the image names from the first column
     image_names = df['image_id']
@@ -78,26 +84,40 @@ def filter_csv(input_file_1, input_file_2, output_file):
         for row in reader:
             a.add(f"{row[0]},{row[1]}")
 
+    outname = output_file.rsplit(".", 1)
+    adapter_out_file = outname[0] + str('_read_name.csv')
+
     # read the second file and filter
     with open(input_file_2, mode='r', newline='', encoding='utf-8') as f2, \
-            open(output_file, mode='w', newline='', encoding='utf-8') as f_out:
+            open(output_file, mode='w', newline='', encoding='utf-8') as f_out, \
+            open(adapter_out_file, mode='w', newline='', encoding='utf-8') as f_adapter_name:
         reader = csv.reader(f2)
         writer = csv.writer(f_out)
+        writer1 = csv.writer(f_adapter_name)
 
         for row in reader:
             # combine the first file first key and the second key
             if f"{row[0]},{row[1]}" in a:
                 writer.writerow(row[:5])
+                writer1.writerow([row[16]])
 
-    print(f"Filtered data has been saved to {output_file}")
+    print(f"Result data has been saved to {output_file}")
 
 
 def merge(folder_path="../result", output_name="adapter_rows_sequence.csv", end="*all_detections_to_pre_adapter.csv"):
     output_file = os.path.join(folder_path, output_name)
 
     header_written = False
+    if not glob.glob(os.path.join(folder_path, end)):
+
+        header = ['image_id', 'x1', 'y1', 'x2', 'y2']
+        with open(output_file, 'w', newline='') as file:
+            writer = csv.writer(file)
+            # 写入表头
+            writer.writerow(header)
 
     for file in glob.glob(os.path.join(folder_path, end)):
+
         if os.path.exists(file):
             with open(file, "r") as f_in:
                 lines = f_in.readlines()
@@ -109,29 +129,28 @@ def merge(folder_path="../result", output_name="adapter_rows_sequence.csv", end=
 
                 with open(output_file, "a") as f_out:
                     f_out.writelines(lines[1:])
-
-    print(f"Saved file: {output_file}")
-
+    print(f"Saved {output_name} in : {output_file}")
     # 删除所有 *all_detections_to_pre_adapter.csv 文件
     for file in glob.glob(os.path.join(folder_path, end)):
         os.remove(file)
 
 
 class Process:
-    def __init__(self, openfile, bam_filename, similarity, eps, min_samples, k_size, bamview_file="../data/bamview-new.csv", output_dir='../result'):
+    def __init__(self, openfile, bam_filename, similarity, eps, min_samples, k_size,
+                 bamview_file="../data/bamview-new.csv", output_dir='../result'):
         # Disable pandas warning
         pd.options.mode.chained_assignment = None
         # init args
         self.openfile = openfile
         self.data_name = os.path.basename(openfile)
-        self.dir_name=os.path.dirname(openfile)
+        self.dir_name = os.path.dirname(openfile)
         self.bamview_new_file = bamview_file
         self.bam_filename = bam_filename
         self.similarity = similarity
         self.eps = eps
         self.min_samples = min_samples
         self.k_size = k_size
-        self.output_dir=output_dir
+        self.output_dir = output_dir
 
     def process_single_file(self):
         # Provide the input file path
@@ -195,15 +214,16 @@ class Process:
         df.insert(17, 'medX', medX)
         df.insert(18, 'medY', medY)
 
-        # Initialize a new column for read names
-        newName = np.zeros(len(df))
-
         # Get the read name for each read based on its image group
         specified_prefix = df['image_id'][0].split('-')[0]
+
 
         # Add prefix to bamview data for easier matching
         bamview['prefix'] = bamview.iloc[:, 0].str.split('-').str[0]
         result_df = bamview[bamview['prefix'] == specified_prefix]
+
+
+
 
         # For each row in df, assign the corresponding read name
         for i in range(len(df)):
@@ -279,6 +299,31 @@ class Process:
                 substring_indices[substring].append(i)
         return substring_indices
 
+    def find_substring_indices(self, long_string, string_array, window_size):
+        """
+        This function finds all occurrences of substrings in a given long string.
+        The substrings should be of the specified window_size and present in string_array.
+
+        Args:
+        long_string (str): The string in which we want to find the substrings.
+        string_array (list): List of substrings to search for.
+        window_size (int): The length of each substring to find.
+
+        Returns:
+        dict: A dictionary where the key is the substring, and the value is a list of indices where the substring is found.
+        """
+        substring_indices = []
+        substring_length = window_size
+        for i in range(len(long_string) - substring_length + 1):
+            indices = []
+            substring = long_string[i:i + substring_length]
+            for j in range(len(string_array)):
+                if string_array[j] == substring:
+                    indices.append(j)
+            if len(indices) > 0:
+                substring_indices.append(indices)
+        return substring_indices
+
     def process_dict(self, input_dict):
         """
         This function processes a dictionary of lists of indices.
@@ -291,14 +336,16 @@ class Process:
         list: A list of processed indices.
         """
         # Convert the values of the dictionary into an array list
-        array_list = list(input_dict.values())
+        array_list = input_dict
 
         # Initialize the result array
         result = []
 
         for i in range(len(array_list)):
+
             current_array = array_list[i]
             if i == 0:
+
                 # For the first array, directly append the first element
                 result.append(current_array[0])
             else:
@@ -453,11 +500,11 @@ class Process:
                     add = bam.pos - truex1
                     truex1 += add
                     truex2 += add
-                if truex1 - bam.pos - 3 >= 0:
+                if truex1 - bam.pos - 8 >= 0:
                     left = truex1 - bam.pos
                 else:
                     left = truex1 - bam.pos
-                sequence = bam.query_sequence[left:truex2 - bam.pos + 3]
+                sequence = bam.query_sequence[left:truex2 - bam.pos + 8]
 
                 row.append(sequence)
                 writer = csv.writer(out_file)
