@@ -4,12 +4,10 @@ threads=8
 diameter_size=600
 cluster_size=3
 k_size=20
-#min_bases=1
-#min_reads=3
 allocated_reads=10000
 bam="/raw.bam"
 bam_f="/filt.bam"
-adaptor_removal=0
+adapter_removal=0
 
 # 参数校验函数
 validate_param() {
@@ -33,9 +31,18 @@ validate_param() {
     fi
   fi
 
-# 使用 awk 进行小数范围比较
+  # 使用 awk 进行小数范围比较
   if ! awk -v val="$value" -v min="$min" -v max="$max" 'BEGIN {exit !(val >= min && val <= max)}'; then
     echo "Error: $name must be between $min and $max."
+    exit 1
+  fi
+}
+
+# 检查 adapter_removal 是否为 0 或 1
+validate_adapter_removal() {
+  local value=$1
+  if ! [[ "$value" =~ ^[01]$ ]]; then
+    echo "Error: adapter_removal must be 0 or 1. (0 = do not remove adapter, 1 = remove adapter)"
     exit 1
   fi
 }
@@ -70,8 +77,8 @@ while [[ $# -gt 0 ]]; do
     -k_size)      
       k_size=$2
       shift 2 ;;
-    -adaptor_removal)      
-      adaptor_removal=1
+    -adapter_removal)      
+      adapter_removal=$2
       shift 2 ;;
     *)             # 处理无效参数
       echo "Invalid option: $1"
@@ -79,34 +86,45 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# 参数验证
 validate_param "$identity_value" 0 1 "identity_value" 0
 validate_param "$diameter_size" 0 5000 "diameter_size" 0
 validate_param "$cluster_size" 2 10 "cluster_size" 1
 validate_param "$threads" 1 100 "threads" 1
 validate_param "$k_size" 1 30 "k_size" 1
 validate_param "$allocated_reads" 100 1000000 "allocated_reads" 1
+validate_adapter_removal "$adapter_removal"
 
 if [ ! -d "$output" ]; then
   mkdir "$output"
 fi
 
+echo "Aligement by minimap2"
 # 运行 minimap2 和 samtools
 if [ ! -f "$output$bam" ]; then
-  #minimap2 -t32 -ax map-hifi "$contigs" "$reads" | samtools view -@ 48 -bS > "$output$bam"
-  minimap2 -t32 -ax map-hifi "$contigs" "$reads" 2>> "$output/runJiuCuo.log" | samtools view -@ 48 -bS 2>> "$output/runJiuCuo.log" > "$output$bam"
-
+  minimap2 -t32 -ax map-hifi "$contigs" "$reads" 2>> "$output/runJiuCuo.log" | samtools view -@ 48 -bS > "$output$bam"
 fi
 
 num=1
-bam_txt="/bamview.txt"
 bamview_file="/bamview-new.csv"
+bam_csv_dir="/bamview_csv"
+bam_csv_dir_a="/bamview_csv/*"
 
-if [ "$adaptor_removal" -eq "$num" ]; then
-  samtools view $output$bam_f 2>> "$output/runJiuCuo.log" > "$output$bam_txt"
-  python picture/bamview-new.py -cvs "$output$bamview_file" -txt "$output$bam_txt"
+python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -allocated_reads "$allocated_reads" -adapter_removal "$adapter_removal"
+
+if [ "$adapter_removal" -eq 0 ]; then
+  echo "Corrected reads have been saved in correction.fastq.gz"
 fi
 
-python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -min_bases "$min_bases" -min_reads "$min_reads" -allocated_reads "$allocated_reads" -adaptor_removal "$adaptor_removal"
+if [ "$adapter_removal" -eq "$num" ]; then
+  file_count=$(ls -1 "$output$bam_csv_dir" | wc -l)
+  if [ "$file_count" -eq 1 ]; then
+    first_file=$(ls "$output$bam_csv_dir" | head -n 1)
+    bamview_file="$bam_csv_dir/$first_file"
+  else
+    cat "$output$bam_csv_dir_a" > "$output$bamview_file"
+  fi
+fi
 
 corr_fq="/correction.fastq.gz"
 infile="$output$corr_fq"
@@ -115,9 +133,18 @@ outfile="$output$corr_a_fq"
 adapter="/adapter"
 adapter_out="/adapter_out"
 process_files="/adapter_remove.csv"
+bam_m="/merge.bam"
+bam_m_s="/merge_s.bam"
+bam_dir="/bam"
+file="/*.bam"
 
-if [ "$adaptor_removal" -eq "$num" ]; then
-  python yolo/process/run.py  --bam_filename "$output$bam_f" \
+if [ "$adapter_removal" -eq "$num" ]; then
+  samtools merge "$output$bam_m" "$output$bam_dir$file" 2>> "$output/runJiuCuo.log"
+  samtools merge "$output$bam_m" $(find "$output$bam_dir" -type f -name "*.bam") 2>> "$output/runJiuCuo.log"
+  samtools sort "$output$bam_m" -o "$output$bam_m_s" 2>> "$output/runJiuCuo.log"
+  samtools index "$output$bam_m_s" 2>> "$output/runJiuCuo.log"
+
+  python yolo/process/run.py  --bam_filename "$output$bam_m_s" \
                --bamview_file "$output$bamview_file"\
                --images_dir "$output$adapter" \
                --similarity "$identity_value" \
@@ -125,6 +152,8 @@ if [ "$adaptor_removal" -eq "$num" ]; then
                --eps "$diameter_size" \
                --min_samples "$cluster_size"\
                --k_size "$k_size"\
-               --adapter_output_dir "$output$adapter_out"\
-  python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile "$outfile" -infile "$infile" -csv "$output$adapter_out$process_files"
+               --adapter_output_dir "$output$adapter_out"
+
+  python correction/adapter_locate-v2.py -bam "$output$bam_m_s" -outfile "$outfile" -infile "$infile" -csv "$output$adapter_out$process_files"
+  echo "Corrected reads have been saved in correction_ar.fastq.gz"
 fi
