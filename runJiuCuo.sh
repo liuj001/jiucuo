@@ -122,7 +122,7 @@ if [ "$adapter_removal" -eq "$num" ]; then
     first_file=$(ls "$output$bam_csv_dir" | head -n 1)
     bamview_file="$bam_csv_dir/$first_file"
   else
-    cat "$output$bam_csv_dir_a" > "$output$bamview_file"
+    cat $(find "$output$bam_csv_dir" -type f -name "*.csv") > "$output$bamview_file"
   fi
 fi
 
