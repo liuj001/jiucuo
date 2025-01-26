@@ -1,4 +1,5 @@
 #!/bin/bash
+
 identity_value=0.6
 threads=8
 diameter_size=600
@@ -8,6 +9,7 @@ allocated_reads=10000
 bam="/raw.bam"
 bam_f="/filt.bam"
 adapter_removal=0
+log_file="/JIUCUO_LOG.txt"
 
 # 参数校验函数
 validate_param() {
@@ -20,20 +22,20 @@ validate_param() {
   # 检查是否为整数
   if [ "$is_integer" == "1" ]; then
     if ! [[ "$value" =~ ^[0-9]+$ ]]; then
-      echo "Error: $name must be an integer."
+      echo "Error: option -$name needs to be an integer."
       exit 1
     fi
   else
     # 浮点数检查（仅支持简单的浮点格式）
     if ! [[ "$value" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-      echo "Error: $name must be a valid number."
+      echo "Error: option -$name needs to be a real number."
       exit 1
     fi
   fi
 
   # 使用 awk 进行小数范围比较
   if ! awk -v val="$value" -v min="$min" -v max="$max" 'BEGIN {exit !(val >= min && val <= max)}'; then
-    echo "Error: $name must be between $min and $max."
+    echo "Error: option -$name needs to be between $min and $max."
     exit 1
   fi
 }
@@ -42,7 +44,7 @@ validate_param() {
 validate_adapter_removal() {
   local value=$1
   if ! [[ "$value" =~ ^[01]$ ]]; then
-    echo "Error: adapter_removal must be 0 or 1. (0 = do not remove adapter, 1 = remove adapter)"
+    echo "Error: option -adapter_removal needs to be 0 or 1 (0 = no removal, 1 = removal)."
     exit 1
   fi
 }
@@ -81,24 +83,31 @@ while [[ $# -gt 0 ]]; do
       adapter_removal=$2
       shift 2 ;;
     *)             # 处理无效参数
-      echo "Invalid option: $1"
+      echo "echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n"Error: -$1 is invalid."
       exit 1 ;;
   esac
 done
 
+# 将标准输出和标准错误同时写入日志文件
+exec > >(tee -a "$output$log_file") 2>&1 > /dev/null
+
+echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing
+Jiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao
+Group of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n"
+
 # 检查必要参数是否已输入
 if [ -z "$contigs" ]; then
-  echo "Error: Missing required parameter -contigs. Please specify the contigs file path."
+  echo "Error: mandatory -contigs is missing."
   exit 1
 fi
 
 if [ -z "$reads" ]; then
-  echo "Error: Missing required parameter -reads. Please specify the reads file path."
+  echo "Error: mandatory -reads is missing."
   exit 1
 fi
 
 if [ -z "$output" ]; then
-  echo "Error: Missing required parameter -output. Please specify the output directory."
+  echo "Error: mandatory -output is missing."
   exit 1
 fi
 
@@ -115,10 +124,10 @@ if [ ! -d "$output" ]; then
   mkdir "$output"
 fi
 
-echo "Aligement by minimap2"
+echo "STAGE 1: Minimap2 alignment"
 # 运行 minimap2 和 samtools
 if [ ! -f "$output$bam" ]; then
-  minimap2 -t32 -ax map-hifi "$contigs" "$reads" 2>> "$output/runJiuCuo.log" | samtools view -@ 48 -bS > "$output$bam"
+  minimap2 -t32 -ax map-hifi "$contigs" "$reads" 2>> "$output/TOOLS_LOG.log" | samtools view -@ 48 -bS > "$output$bam"
 fi
 
 num=1
@@ -129,7 +138,7 @@ bam_csv_dir_a="/bamview_csv/*"
 python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -allocated_reads "$allocated_reads" -adapter_removal "$adapter_removal"
 
 if [ "$adapter_removal" -eq 0 ]; then
-  echo "HiFi reads with base error correction have been saved in base_correction.fastq.gz"
+  echo -e "\nDone! Please find the correction file(s) in output directory."
 fi
 
 if [ "$adapter_removal" -eq "$num" ]; then
@@ -154,9 +163,9 @@ bam_m_s="/merge_s.bam"
 bam_dir="/bam"
 
 if [ "$adapter_removal" -eq "$num" ]; then
-  samtools merge "$output$bam_m" $(find "$output$bam_dir" -type f -name "*.bam") 2>> "$output/runJiuCuo.log"
-  samtools sort "$output$bam_m" -o "$output$bam_m_s" 2>> "$output/runJiuCuo.log"
-  samtools index "$output$bam_m_s" 2>> "$output/runJiuCuo.log"
+  samtools merge "$output$bam_m" $(find "$output$bam_dir" -type f -name "*.bam") 2>> "$output/TOOLS_LOG.log"
+  samtools sort "$output$bam_m" -o "$output$bam_m_s" 2>> "$output/TOOLS_LOG.log"
+  samtools index "$output$bam_m_s" 2>> "$output/TOOLS_LOG.log"
 
   python yolo/process/run.py  --bam_filename "$output$bam_m_s" \
                --bamview_file "$output$bamview_file"\
@@ -169,5 +178,5 @@ if [ "$adapter_removal" -eq "$num" ]; then
                --adapter_output_dir "$output$adapter_out"
 
   python correction/adapter_locate-v2.py -bam "$output$bam_m_s" -outfile "$outfile" -infile "$infile" -csv "$output$adapter_out$process_files"
-  echo "HiFi reads with base error correction and adapter removal have been saved in base_correction_adapter_removal.fastq.gz"
+  echo -e "\nDone! Please find the correction file(s) in output directory."
 fi
