@@ -113,7 +113,7 @@ bam_csv_dir_a="/bamview_csv/*"
 python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -allocated_reads "$allocated_reads" -adapter_removal "$adapter_removal"
 
 if [ "$adapter_removal" -eq 0 ]; then
-  echo "Corrected reads have been saved in correction.fastq.gz"
+  echo "HiFi reads with base error correction have been saved in base_correction.fastq.gz"
 fi
 
 if [ "$adapter_removal" -eq "$num" ]; then
@@ -126,9 +126,9 @@ if [ "$adapter_removal" -eq "$num" ]; then
   fi
 fi
 
-corr_fq="/correction.fastq.gz"
+corr_fq="/base_correction.fastq.gz"
 infile="$output$corr_fq"
-corr_a_fq="/correction_ar.fastq.gz"
+corr_a_fq="/base_correction_adapter_removal.fastq.gz"
 outfile="$output$corr_a_fq"
 adapter="/adapter"
 adapter_out="/adapter_out"
@@ -155,5 +155,5 @@ if [ "$adapter_removal" -eq "$num" ]; then
                --adapter_output_dir "$output$adapter_out"
 
   python correction/adapter_locate-v2.py -bam "$output$bam_m_s" -outfile "$outfile" -infile "$infile" -csv "$output$adapter_out$process_files"
-  echo "Corrected reads have been saved in correction_ar.fastq.gz"
+  echo "HiFi reads with base error correction and adapter removal have been saved in base_correction_adapter_removal.fastq.gz"
 fi
