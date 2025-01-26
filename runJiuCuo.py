@@ -354,7 +354,7 @@ if __name__ == '__main__':
     t = outdir + "/common.txt"
     os.remove(t)
 
-    end_cmd = "cat %s/s.fastq.gz %s/reads_c.fastq.gz > %s/correction.fastq.gz" % (outdir, outdir, outdir)
+    end_cmd = "cat %s/s.fastq.gz %s/reads_c.fastq.gz > %s/base_correction.fastq.gz" % (outdir, outdir, outdir)
     with open(log_file, "a") as log:
         end_p = subprocess.Popen(end_cmd, shell=True, stdout=log, stderr=log)
         end_code = end_p.wait()
