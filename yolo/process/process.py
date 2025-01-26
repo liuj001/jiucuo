@@ -23,7 +23,7 @@ def images_inference(image_dir, output_image_dir, output_csv_path):
     all_results = []
 
     # Use tqdm to show a progress bar for the loop
-    for image_path in tqdm(image_paths, desc="Processing images", unit="image"):  # Add tqdm progress bar
+    for image_path in tqdm(image_paths, desc="STAGE 5: Adapter removal task allocation",bar_format="{l_bar}{bar} |"):  # Add tqdm progress bar
         result = model(image_path, verbose=False)  # Run inference on a single image
         image_name = os.path.basename(image_path)
         boxes = result[0].boxes
@@ -47,7 +47,7 @@ def images_inference(image_dir, output_image_dir, output_csv_path):
     new_df = df.iloc[:, :7]
     new_df.to_csv(output_csv_path, index=False, encoding="utf-8-sig")
 
-    print(f"Detection results saved to {output_csv_path}")
+    # print(f"Detection results saved to {output_csv_path}")
     # print(f"Annotated images saved in {output_image_dir}")
 
 
@@ -101,7 +101,7 @@ def filter_csv(input_file_1, input_file_2, output_file):
                 writer.writerow(row[:5])
                 writer1.writerow([row[16]])
 
-    print(f"Result data has been saved to {output_file}")
+    # print(f"Result data has been saved to {output_file}")
 
 
 def merge(folder_path="../result", output_name="adapter_rows_sequence.csv", end="*all_detections_to_pre_adapter.csv"):
@@ -129,7 +129,7 @@ def merge(folder_path="../result", output_name="adapter_rows_sequence.csv", end=
 
                 with open(output_file, "a") as f_out:
                     f_out.writelines(lines[1:])
-    print(f"Saved {output_name} in : {output_file}")
+    # print(f"Saved {output_name} in : {output_file}")
     # 删除所有 *all_detections_to_pre_adapter.csv 文件
     for file in glob.glob(os.path.join(folder_path, end)):
         os.remove(file)
@@ -463,11 +463,8 @@ class Process:
         bamfile = pysam.AlignmentFile(self.bam_filename, "rb")
 
         for bam in bamfile:
-            """ if bam.pos == 60586:
-                print(bam.cigar)
-                break """
-            if len(rows[tmp]) < 16:
-                print(rows[tmp])
+        
+ 
 
             while rows[tmp][16] == bam.query_name:
                 row = rows[tmp]
@@ -535,8 +532,8 @@ class Process:
         # Define the adapter sequences
         self.sequence_df = pd.read_csv(f'{self.data_name}_pre_adapter_out_all_detections.csv')
         df = self.sequence_df
-        adapter_sequences = ['ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT', 'AAAAAAAAAAAAAAAAAATTAACGGAGGAGGAGGA',
-                             'ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT', 'TCCTCCTCCTCCGTTAATTTTTTTTTTTTTTTTTT']
+        adapter_sequences = ['ATBh44uss7DrXpK46kRZHyqqZdKY1CU7S7hTGAGAGAGAT', 'AAAAAAAAAAAAAAAAAATTAACGGAGGAGGAGGA',
+                             'ATBh44uss7DrXpK46kRZHyqqZdKY1CU7S7hAGAGAGAGAT', 'TBh44uss7DrXpK46kRZHyqqZdKY1CU7S7hT']
         # Prepare the arrays for each adapter sequence
         new_array1 = []
         new_array2 = []
