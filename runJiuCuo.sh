@@ -86,9 +86,25 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# 检查必要参数是否已输入
+if [ -z "$contigs" ]; then
+  echo "Error: Missing required parameter -contigs. Please specify the contigs file path."
+  exit 1
+fi
+
+if [ -z "$reads" ]; then
+  echo "Error: Missing required parameter -reads. Please specify the reads file path."
+  exit 1
+fi
+
+if [ -z "$output" ]; then
+  echo "Error: Missing required parameter -output. Please specify the output directory."
+  exit 1
+fi
+
 # 参数验证
 validate_param "$identity_value" 0 1 "identity_value" 0
-validate_param "$diameter_size" 0 5000 "diameter_size" 0
+validate_param "$diameter_size" 0 5000 "diameter_size" 1
 validate_param "$cluster_size" 2 10 "cluster_size" 1
 validate_param "$threads" 1 100 "threads" 1
 validate_param "$k_size" 1 30 "k_size" 1
@@ -136,10 +152,8 @@ process_files="/adapter_remove.csv"
 bam_m="/merge.bam"
 bam_m_s="/merge_s.bam"
 bam_dir="/bam"
-file="/*.bam"
 
 if [ "$adapter_removal" -eq "$num" ]; then
-  samtools merge "$output$bam_m" "$output$bam_dir$file" 2>> "$output/runJiuCuo.log"
   samtools merge "$output$bam_m" $(find "$output$bam_dir" -type f -name "*.bam") 2>> "$output/runJiuCuo.log"
   samtools sort "$output$bam_m" -o "$output$bam_m_s" 2>> "$output/runJiuCuo.log"
   samtools index "$output$bam_m_s" 2>> "$output/runJiuCuo.log"
