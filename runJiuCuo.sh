@@ -83,10 +83,15 @@ while [[ $# -gt 0 ]]; do
       adapter_removal=$2
       shift 2 ;;
     *)             # 处理无效参数
-      echo "echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n"Error: -$1 is invalid."
+      echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n\nError: -$1 is invalid."
       exit 1 ;;
   esac
 done
+
+if [ -z "$output" ]; then
+  echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n\nError: mandatory -output is missing."
+  exit 1
+fi
 
 # 将标准输出和标准错误同时写入日志文件
 exec > >(tee "$output$log_file") 2>&1
@@ -103,11 +108,6 @@ fi
 
 if [ -z "$reads" ]; then
   echo "Error: mandatory -reads is missing."
-  exit 1
-fi
-
-if [ -z "$output" ]; then
-  echo "Error: mandatory -output is missing."
   exit 1
 fi
 
@@ -136,10 +136,6 @@ bam_csv_dir="/bamview_csv"
 bam_csv_dir_a="/bamview_csv/*"
 
 python runJiuCuo.py -contigs "$contigs" -reads "$reads" -output "$output" -threads  "$threads" -allocated_reads "$allocated_reads" -adapter_removal "$adapter_removal"
-
-if [ "$adapter_removal" -eq 0 ]; then
-  echo -e "\nDone! Please find the correction file(s) in output directory."
-fi
 
 if [ "$adapter_removal" -eq "$num" ]; then
   file_count=$(ls -1 "$output$bam_csv_dir" | wc -l)
@@ -178,5 +174,5 @@ if [ "$adapter_removal" -eq "$num" ]; then
                --adapter_output_dir "$output$adapter_out"
 
   python correction/adapter_locate-v2.py -bam "$output$bam_m_s" -outfile "$outfile" -infile "$infile" -csv "$output$adapter_out$process_files"
-  echo -e "\nDone! Please find the correction file(s) in output directory."
 fi
+echo -e "\nDone! Please find the correction file(s) in output directory"
