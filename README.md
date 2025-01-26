@@ -87,9 +87,8 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
 
 
 ### 5. Outputs
-`correction.fastq.gz`
- Corrected HiFi reads.
+`base_correction.fastq.gz`
+HiFi reads with base error correction.
 
-`correction_ar.fastq.gz`
- Corrected HiFi reads without adapter.
-
+`base_correction_adapter_removal.fastq.gz`
+ HiFi reads with base error correction and adapter removal.
