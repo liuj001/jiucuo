@@ -60,7 +60,7 @@ def process_names_with_threads(names, num_threads):
 
     threads = []
     chunk_size = len(names) // num_threads
-    progress_bar = tqdm(total=len(names), desc='Processing Files',position=0)
+    progress_bar = tqdm(total=len(names), desc='STAGE 6: Adapter removal',position=0,bar_format="{l_bar}{bar} |")
     # Create and start threads
     for i in range(num_threads):
         start = i * chunk_size
@@ -137,7 +137,7 @@ while args.k_size is None or args.k_size < 1 or args.k_size > 30:
 
 output_detection_csv_dir=os.path.dirname(args.output_detection_csv_path)
 if args.is_inference > 0:
-    print("step 1 : start processing images")
+    # print("step 1 : start processing images")
     images_inference(args.images_dir, args.output_images_dir, args.output_detection_csv_path)
     args.process_files = args.output_detection_csv_path
 
@@ -145,7 +145,7 @@ if args.is_inference > 0:
 os.makedirs(args.images_dir, exist_ok=True)
 os.makedirs(args.output_images_dir, exist_ok=True)
 
-print("step 2 : start processing files")
+
 # Directory containing the files to process
 directory = os.path.dirname(args.process_files)
 # process image name
@@ -158,11 +158,11 @@ for filename in os.listdir(directory):
         similar_filenames.append(a)
 # Process the list of filenames using the specified number of threads
 process_names_with_threads(similar_filenames, args.num_threads)
-print("step 3 : start merge files and get results")
+
 # merge sequence adapter
-print(" start merging sequence process files ")
+
 res = merge(folder_path=args.adapter_output_dir, output_name="adapter_rows_sequence.csv")
-print(" start merging dbscan process files ")
+
 # merge cluster adapter
 merge(folder_path=directory, output_name="adapter_rows_dbscan.csv", end="*second_part.csv")
 
@@ -171,7 +171,7 @@ filter_csv(f'{args.adapter_output_dir}/adapter_rows_sequence.csv', f'{directory}
            f'{args.adapter_output_dir}/adapter_remove.csv')
 
 shutil.copy(f'{args.adapter_output_dir}/adapter_remove.csv', result_dir)
-print(f" results saved in {result_dir}")
+
 
 for filename in os.listdir(directory):
     if filename.endswith('_data.csv'):
