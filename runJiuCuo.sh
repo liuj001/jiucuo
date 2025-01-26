@@ -89,7 +89,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # 将标准输出和标准错误同时写入日志文件
-exec > >(tee -a "$output$log_file") 2>&1 > /dev/null
+exec > >(tee "$output$log_file") 2>&1
 
 echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing
 Jiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao
