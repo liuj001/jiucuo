@@ -298,7 +298,7 @@ if __name__ == '__main__':
         chr_n = chr_file.readlines()
 
     # 创建进度条
-    with tqdm(total=len(chr_n), desc="Splitting BAM files") as pbar:
+    with tqdm(total=len(chr_n), desc="Splitting BAM files", bar_format="{l_bar}{bar} |") as pbar:
         with ThreadPoolExecutor(max_workers=thread) as executor:
             # 使用回调函数更新进度条
             futures = [executor.submit(spilt, chr) for chr in chr_n]
@@ -320,7 +320,7 @@ if __name__ == '__main__':
     chr_l = list(filter(file_filter, chr_list))
 
     # 创建进度条
-    with tqdm(total=len(chr_l), desc="Correcting Errors") as pbar:
+    with tqdm(total=len(chr_l), desc="Correcting Errors", bar_format="{l_bar}{bar} |") as pbar:
         with ThreadPoolExecutor(max_workers=thread) as executor:
             futures = [executor.submit(error_correct, chr) for chr in chr_l]
             for future in futures:
@@ -331,8 +331,7 @@ if __name__ == '__main__':
      
     start_read = time()
     # 显示拼接进度
-    print("Processing reads...")
-    with tqdm(total=3, desc="Merging and Processing Reads") as pbar:
+    with tqdm(total=3, desc="Merging and Processing Reads", bar_format="{l_bar}{bar} |") as pbar:
         read_cmd = "cat %s/*.gz > %s/reads_c.fastq.gz" % (c_reads_dir, outdir)
         with open(log_file, "a") as log:
             read_p = subprocess.Popen(read_cmd, shell=True, stdout=log, stderr=log)
