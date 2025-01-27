@@ -93,6 +93,10 @@ if [ -z "$output" ]; then
   exit 1
 fi
 
+if [ ! -d "$output" ]; then
+  mkdir "$output"
+fi
+
 # 将标准输出和标准错误同时写入日志文件
 exec > >(tee "$output$log_file") 2>&1
 
@@ -120,10 +124,6 @@ validate_param "$k_size" 1 30 "k_size" 1
 validate_param "$allocated_reads" 100 1000000 "allocated_reads" 1
 validate_adapter_removal "$adapter_removal"
 
-if [ ! -d "$output" ]; then
-  mkdir "$output"
-fi
-
 echo "STAGE 1: Minimap2 alignment"
 # 运行 minimap2 和 samtools
 if [ ! -f "$output$bam" ]; then
@@ -147,9 +147,9 @@ if [ "$adapter_removal" -eq "$num" ]; then
   fi
 fi
 
-corr_fq="/base_correction.fastq.gz"
+corr_fq="/base_correction.fastq"
 infile="$output$corr_fq"
-corr_a_fq="/base_correction_adapter_removal.fastq.gz"
+corr_a_fq="/base_correction_adapter_removal.fastq"
 outfile="$output$corr_a_fq"
 adapter="/adapter"
 adapter_out="/adapter_out"
