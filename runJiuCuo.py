@@ -332,19 +332,19 @@ if __name__ == '__main__':
     start_read = time()
     # 显示拼接进度
     with tqdm(total=3, desc="STAGE 4: SNP-aware error correction results writing to file", bar_format="{l_bar}{bar} |") as pbar:
-        read_cmd = "cat %s/*.gz > %s/reads_c.fastq.gz" % (c_reads_dir, outdir)
+        read_cmd = "cat %s/*.fastq > %s/reads_c.fastq" % (c_reads_dir, outdir)
         with open(log_file, "a") as log:
             read_p = subprocess.Popen(read_cmd, shell=True, stdout=log, stderr=log)
             read_code = read_p.wait()
         pbar.update(1)
 
-        com_cmd = "seqkit common %s %s/reads_c.fastq.gz | seqkit seq -n -i -o %s/common.txt" % (reads_path, outdir, outdir)
+        com_cmd = "seqkit common %s %s/reads_c.fastq | seqkit seq -n -i -o %s/common.txt" % (reads_path, outdir, outdir)
         with open(log_file, "a") as log:
             com_p = subprocess.Popen(com_cmd, shell=True, stdout=log, stderr=log)
             com_code = com_p.wait()
         pbar.update(1)
 
-        rem_cmd = "seqkit grep -v -f %s/common.txt %s -o %s/s.fastq.gz" % (outdir, reads_path, outdir)
+        rem_cmd = "seqkit grep -v -f %s/common.txt %s -o %s/s.fastq" % (outdir, reads_path, outdir)
         with open(log_file, "a") as log:
             rem_p = subprocess.Popen(rem_cmd, shell=True, stdout=log, stderr=log)
             rem_code = rem_p.wait()
@@ -353,14 +353,14 @@ if __name__ == '__main__':
     t = outdir + "/common.txt"
     os.remove(t)
 
-    end_cmd = "cat %s/s.fastq.gz %s/reads_c.fastq.gz > %s/base_correction.fastq.gz" % (outdir, outdir, outdir)
+    end_cmd = "cat %s/s.fastq %s/reads_c.fastq > %s/base_correction.fastq" % (outdir, outdir, outdir)
     with open(log_file, "a") as log:
         end_p = subprocess.Popen(end_cmd, shell=True, stdout=log, stderr=log)
         end_code = end_p.wait()
 
-    c = outdir + "/reads_c.fastq.gz"
+    c = outdir + "/reads_c.fastq"
     os.remove(c)
-    s = outdir + "/s.fastq.gz"
+    s = outdir + "/s.fastq"
     os.remove(s)
 
     end = time()
