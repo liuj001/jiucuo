@@ -17,8 +17,8 @@ infile = args.infile
 csv_f = args.csv
 bam = args.bam
 
-in_file = gzip.open(infile, 'r')  # 纠错后的fq文件（含义adapter）
-out_file = gzip.open(outfile, 'w')  # 去除adapter的fq文件
+in_file = open(infile, 'r')  # 纠错后的fq文件（含义adapter）
+out_file = open(outfile, 'w')  # 去除adapter的fq文件
 
 lines = in_file.readlines()
 
