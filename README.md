@@ -77,7 +77,7 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
   Identity value in adapter matching.
 
 `-adaptor_removal (0)`
-  Adapter removal from the reads. 0 indicates no adapter removal, while 1 indicates adapter removal.
+  Adapter removal from the reads (0 is no adapter removal and 1 is adapter removal)
 
 `-threads [int] (8)`
   Number of threads during correction
@@ -87,8 +87,8 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
 
 
 ### 5. Outputs
-`base_correction.fastq.gz`
-HiFi reads with base error correction.
+`base_correction.fastq`
+HiFi reads with base error correction
 
-`base_correction_adapter_removal.fastq.gz`
- HiFi reads with base error correction and adapter removal.
+`base_correction_adapter_removal.fastq`
+ HiFi reads with base error correction and adapter removal
