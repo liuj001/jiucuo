@@ -12,7 +12,7 @@ def correct(bam_dir, txt_dir, ec_dir, c_reads_dir, chr):
     #directory = '/root/autodl-tmp/test/' #txt文件和ec文件目录
     path_bam = bam_dir + '/' + chr + '.bam'  #bam文件
     #in_read = gzip.open('Z.mays/CRR302668.fastq.gz','rt') #初始read
-    out_read = gzip.open(c_reads_dir+'/'+chr+'.ec.fastq.gz','wt')  #修改后的read
+    out_read = open(c_reads_dir+'/'+chr+'.ec.fastq','wt')  #修改后的read
     #out_check = open('check.txt','w')
     ec_list = list()
     txt_list = list()
