@@ -70,7 +70,7 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
 `-cluster_size [int] (3)`
   Minumum cluster size in DBSCAN
 
-`-k_size [int] (20)`
+`-k_size [int] (5)`
   Size of k-mer in adapter matching
 
 `-identity_value n (0.6)`
