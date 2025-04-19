@@ -171,6 +171,24 @@ def correct(bam_dir, txt_dir, ec_dir, c_reads_dir, chr):
                     elif l_b == b_len-1 and (bases[l_b] == ',' or bases[l_b] == '.' or bases[l_b] == '*' or bases[l_b] == 'a' or bases[l_b] == 'A'or bases[l_b] == 'c' or bases[l_b] == 'C' or bases[l_b] == 'g' or bases[l_b] == 'G' or bases[l_b] == 't' or bases[l_b] == 'T' or bases[l_b] == 'N' or bases[l_b] == 'n'):
                         l_b += 1
                         tmp_p += 1
+                    ###
+                    elif bases[l_b] == '+' or bases[l_b] == '-':
+                        q = 0
+                        p = 1
+                        l_b += 1
+                        for j in range(l_b,b_len):
+                            if '0'<=bases[j]<='9':
+                                l_b += 1
+                            else: 
+                                break
+                        for j in range(0,l_b):
+                            if '0'<=bases[l_b-1]<='9' :
+                                q = q + p*int(bases[l_b-1]) + 1
+                                p = p*10
+                                l_b -= 1
+                            else:   
+                                break
+                        l_b = l_b + q
                     if l_b >= b_len:
                         break
                 ''' while int(line_txt_arr[1]) > int(line_ec_arr[1]):
