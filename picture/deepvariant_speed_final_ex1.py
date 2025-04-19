@@ -17,7 +17,7 @@ import os
 #path_gt = '../SNPTools/benchmark/20.vcf'
 
 def extract_before_underscore(strings):
-    return [s.split('_')[0] for s in strings]
+    return ['_'.join(s.split('_')[:-1]) for s in strings]
 
 def snp_pic(bam_dir, txt_dir, bcf_txt_dir, snp_pic, chr):
     #print("snp_pic")
@@ -33,7 +33,7 @@ def snp_pic(bam_dir, txt_dir, bcf_txt_dir, snp_pic, chr):
 
     refs = extract_before_underscore(refs_)
     #bamfile.close()
-    #print('Refrence Done!')
+    # print('Refrence Done!')
     ## 读取比对文件
     #begin_txt = time()
     #txtfile = open(path_txt,"r")
