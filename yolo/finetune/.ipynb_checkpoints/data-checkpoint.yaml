@@ -1,0 +1,10 @@
+train: /root/yolo/yolov8/v2/YOLOv8-main/data/adapter/images/train
+test:  /root/yolo/yolov8/v2/YOLOv8-main/data/adapter/images/test
+val:   /root/yolo/yolov8/v2/YOLOv8-main/data/adapter/images/val
+
+
+#如果按照上述方式建立文件夹，则上面train、test和val地址可以不变
+
+nc: 1
+names: ['object']
+
