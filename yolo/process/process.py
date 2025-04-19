@@ -8,11 +8,15 @@ from sklearn.cluster import DBSCAN
 from ultralytics import YOLO
 import cv2
 from tqdm import tqdm
+import torch
 
-
-def images_inference(image_dir, output_image_dir, output_csv_path):
+def images_inference(image_dir, output_image_dir, output_csv_path,st):
     # Load the pre-trained YOLO model
-    model = YOLO("yolo/process/best.pt")
+    device = torch.device("cuda:0")
+    
+    # torch.set_num_threads(8)
+    # model = YOLO("/root/autodl-tmp/ada/adapter/yolo/process/best.pt").to(device)
+    model = YOLO("yolo/process/best.pt").to(device)
     image_paths = [os.path.join(image_dir, fname) for fname in os.listdir(image_dir) if
                    fname.endswith(('.jpg', '.png', '.jpeg'))]
 
@@ -21,9 +25,12 @@ def images_inference(image_dir, output_image_dir, output_csv_path):
 
     # Store detection results
     all_results = []
-
+    if st:
+        stage_st=5
+    else :
+        stage_st=3
     # Use tqdm to show a progress bar for the loop
-    for image_path in tqdm(image_paths, desc="STAGE 5: Adapter removal task allocation",bar_format="{l_bar}{bar} |"):  # Add tqdm progress bar
+    for image_path in tqdm(image_paths, desc=f'STAGE {stage_st}: Adapter detection',bar_format="{l_bar}{bar} |"):  # Add tqdm progress bar
         result = model(image_path, verbose=False)  # Run inference on a single image
         image_name = os.path.basename(image_path)
         boxes = result[0].boxes
@@ -36,20 +43,13 @@ def images_inference(image_dir, output_image_dir, output_csv_path):
                 class_name = model.names[class_id]
                 all_results.append([image_name, x1, y1, x2, y2, confidence, class_id, class_name])
 
-        # Save images
-        # output_image_path = os.path.join(output_image_dir, image_name)
-        # annotated_image = result[0].plot()
-        # cv2.imwrite(output_image_path, annotated_image)
-
     # Save detection results to a CSV file
     df = pd.DataFrame(all_results,
                       columns=["image_id", "x1", "y1", "x2", "y2", "confidence", "hard_score", "Class Name"])
     new_df = df.iloc[:, :7]
     new_df.to_csv(output_csv_path, index=False, encoding="utf-8-sig")
-
-    # print(f"Detection results saved to {output_csv_path}")
-    # print(f"Annotated images saved in {output_image_dir}")
-
+    del model
+    
 
 def process_image_name(process_image_name_file="../data/detection_results.csv"):
     # remove ptg* files
@@ -65,7 +65,7 @@ def process_image_name(process_image_name_file="../data/detection_results.csv"):
     # Extract the image names from the first column
     image_names = df['image_id']
     # Extract the part before the first '-' and create a new column 'Category'
-    df['Category'] = image_names.apply(lambda x: x.split('-')[0])
+    df['Category'] = image_names.apply(lambda x: x.rsplit('-',1)[0])
     # Create and save separate CSV files based on the unique values in the 'Category' column
     unique_categories = df['Category'].unique()
     for category in unique_categories:
@@ -98,7 +98,7 @@ def filter_csv(input_file_1, input_file_2, output_file):
         for row in reader:
             # combine the first file first key and the second key
             if f"{row[0]},{row[1]}" in a:
-                writer.writerow(row[:5])
+                writer.writerow(row)
                 writer1.writerow([row[16]])
 
     # print(f"Result data has been saved to {output_file}")
@@ -216,12 +216,18 @@ class Process:
 
         # Get the read name for each read based on its image group
         specified_prefix = df['image_id'][0].split('-')[0]
-
+        # print(df['image_id'][0])
 
         # Add prefix to bamview data for easier matching
         bamview['prefix'] = bamview.iloc[:, 0].str.split('-').str[0]
+        # print(specified_prefix)
         result_df = bamview[bamview['prefix'] == specified_prefix]
+        
 
+
+        if result_df.empty:
+            print("please check the pre_output_file bamview-new.csv whether matched yolo detections.csv")
+        
 
 
 
@@ -439,7 +445,7 @@ class Process:
 
         return False
 
-    def base_all_detections(self):
+    def base_all_detections1(self):
         """
         This function processes the BAM file and matches the sequences from the CSV file to identify reads containing adapter sequences.
 
@@ -460,7 +466,11 @@ class Process:
         rows[0].append('read_seq')
         writer.writerow(rows[0])
         tmp = 1
-        bamfile = pysam.AlignmentFile(self.bam_filename, "rb")
+        
+        contig_name=rows[1][0].split('-')[0]
+
+        
+        bamfile = pysam.AlignmentFile(self.bam_filename+contig_name+".bam", "rb")
 
         for bam in bamfile:
         
@@ -516,6 +526,120 @@ class Process:
 
         return self
 
+    def base_all_detections(self):
+        import multiprocessing
+        from collections import defaultdict
+        """
+        优化后的BAM处理方法，解决多进程性能瓶颈
+        """
+       
+        from io import StringIO
+                     
+        output_file = f"{self.data_name}_pre_adapter_out_all_detections.csv"
+        
+        # ========== 数据处理阶段 ==========
+        # 直接在内存中转换DataFrame
+        csv_buffer = StringIO()
+        self.df.to_csv(csv_buffer, index=False)
+        csv_buffer.seek(0)
+        reader = csv.reader(csv_buffer)
+        rows = list(reader)
+        header = rows[0] + ["read_seq"]
+        
+        # 构建查询字典（加速查找）
+        query_dict = defaultdict(list)
+        for idx, row in enumerate(rows[1:]):  
+            try:
+                query_name = row[16] 
+                query_dict[query_name].append(idx)
+            except IndexError:
+                continue
+    
+        # ========== BAM处理阶段 ==========
+        with pysam.AlignmentFile(self.bam_filename, "rb") as bamfile, \
+             open(output_file, "w") as out_file:
+            
+            writer = csv.writer(out_file)
+            writer.writerow(header)
+            
+            processed_queries = set()
+            
+            # 批量处理BAM记录
+            for bam in bamfile:
+                qname = bam.query_name
+                
+                # 快速跳过不需要处理的记录
+                if qname not in query_dict or qname in processed_queries:
+                    continue
+                    
+                # 获取所有关联的CSV行
+                row_indices = query_dict[qname]
+                
+                # 批量处理数据
+                batch_results = []
+                for idx in row_indices:
+                    row = rows[idx+1]  # +1因为rows[0]是标题
+                    try:
+                        start = int(row[8])
+                        parts = row[0].split('-')
+                        num = int(parts[2].split('.')[0]) - 1
+                    except (IndexError, ValueError) as e:
+                        print(f"格式错误跳过行 {idx}: {str(e)}")
+                        continue
+                    
+                    # 计算坐标
+                    truex1 = start + num * 445 + (int(row[1]) - 1) // 3
+                    truex2 = start + num * 445 + (int(row[3]) - 1) // 3
+                    
+                    # 优化CIGAR解析
+                    cigar_stats = {
+                        0: 0,  # match
+                        1: 0,  # insert
+                        2: 0,  # delete
+                        4: 0   # soft clip
+                    }
+                    for op, length in bam.cigartuples:
+                        if op in cigar_stats:
+                            cigar_stats[op] += length
+                    
+                    # 调整坐标计算
+                    count_adjust = cigar_stats[4] + cigar_stats[1] - cigar_stats[2]
+                    if (truex1 - bam.pos) <= 1:
+                        count_adjust -= 45
+                    elif (truex2 - bam.pos) >= (cigar_stats[2] + cigar_stats[0]+ 30):
+                        count_adjust += 1
+                    
+                    truex1 += count_adjust
+                    truex2 += count_adjust
+                    if truex1 - bam.pos < 0:
+                        add = bam.pos - truex1
+                        truex1 += add
+                        truex2 += add
+                    
+                    # 边界检查
+                    left = max(0, truex1 - bam.pos)
+                    seq_end = truex2 - bam.pos + 8
+                    
+                    # 获取序列
+                    sequence = bam.query_sequence[left:seq_end] if bam.query_sequence else ""
+                    
+                    batch_results.append(row + [sequence])
+                
+                # 批量写入
+                writer.writerows(batch_results)
+                processed_queries.add(qname)
+                
+                # 提前退出优化
+                if len(processed_queries) == len(query_dict):
+                    break
+    
+
+        if multiprocessing.parent_process() is None:  
+            for f in glob.glob(f"{self.data_name}_tmp.csv"):
+                os.remove(f)
+            
+        return self
+
     def ATGCFiltDetections(self):
         """
         This function performs detection on adapter sequences based on similarity and k-mer size,
@@ -532,8 +656,8 @@ class Process:
         # Define the adapter sequences
         self.sequence_df = pd.read_csv(f'{self.data_name}_pre_adapter_out_all_detections.csv')
         df = self.sequence_df
-        adapter_sequences = ['ATBh44uss7DrXpK46kRZHyqqZdKY1CU7S7hTGAGAGAGAT', 'AAAAAAAAAAAAAAAAAATTAACGGAGGAGGAGGA',
-                             'ATBh44uss7DrXpK46kRZHyqqZdKY1CU7S7hAGAGAGAGAT', 'TBh44uss7DrXpK46kRZHyqqZdKY1CU7S7hT']
+        adapter_sequences = ['ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT', 'AAAAAAAAAAAAAAAAAATTAACGGAGGAGGAGGA',
+                             'ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT', 'TCCTCCTCCTCCGTTAATTTTTTTTTTTTTTTTTT']
         # Prepare the arrays for each adapter sequence
         new_array1 = []
         new_array2 = []
@@ -589,10 +713,9 @@ class Process:
         data_to_save1 = adapter_rows1[adapter_rows1_columns_to_save]
 
         combined_data = pd.concat([data_to_save1, data_to_save])
-        # print(combined_data)
+        
         combined_data = combined_data.drop_duplicates(subset=['image_id', 'x1'])
-        # Save the final result
-        # combined_data.to_csv(f'{self.openfile}_{file_name}', index=False)
+        
 
         if not combined_data.empty:
             combined_data.to_csv(f'{self.output_dir}/{self.data_name}_{file_name}', index=False)
