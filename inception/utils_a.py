@@ -28,7 +28,8 @@ import glob
 
 def get_network():
     net = inceptionv4()
-    net = net.cuda()
+    #net = net.cuda()
+    net = net.to('cpu')
     return net
 
 class Mydatasetpro(Dataset):
