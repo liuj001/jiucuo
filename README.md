@@ -12,7 +12,7 @@ JiuCuo is under the Artistic License 2.0.
 
 ### 1. System requirements
 
-JiuCuo is suitable for 32-bit or 64-bit machines with Linux operating systems. JiuCuo include minimap2 alignment, samtools processing and error correction, where the former two require relatively large memory, and the later uses no more than 10 GB.
+JiuCuo is suitable for 32-bit or 64-bit machines with Linux operating systems. JiuCuo include minimap2 alignment, samtools processing and error correction, where the former two require relatively large memory, and the later uses no more than 40 GB.
 
 ### 2. Installation
 Please ensure that Git LFS is installed. If it is not installed, please follow the steps below to install it:
@@ -27,13 +27,10 @@ cd jiucuo
 conda env create -f JiuCuo.yml
 ```
 Notes:
-- if you can't install torch and torchvision successfully, please download from this link: https://download.pytorch.org/whl/torch_stable.html
-```sh
-torch-1.8.1+cu111-cp38-cp38-linux_x86_64
-torchvision-0.9.1+cu111-cp38-cp38-linux_x86_64
-```
 - The following packages may fail to install, it is recommended to install them manually.
 ```sh
+pip install https://download.pytorch.org/whl/cu111/torch-1.8.1%2Bcu111-cp38-cp38-linux_x86_64.whl -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+pip install https://download.pytorch.org/whl/cu111/torchvision-0.9.1%2Bcu111-cp38-cp38-linux_x86_64.whl  -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 pip install pysam
 pip install lxml
 pip install matplotlib
@@ -64,6 +61,12 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
   Output directory
 
 #### Options (default value):
+`-base_correction (1) `
+  Base correction in the reads (1 is base correction and 1 is no base correction)
+
+`-adapter_removal (0)`
+  Adapter removal from the reads (0 is no adapter removal and 1 is adapter removal)
+
 `-diameter_size [int] (600)`
   Maximum diameter size in DBSCAN
 
@@ -76,15 +79,13 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
 `-identity_value n (0.6)`
   Identity value in adapter matching.
 
-`-adaptor_removal (0)`
-  Adapter removal from the reads (0 is no adapter removal and 1 is adapter removal)
-
 `-threads [int] (8)`
   Number of threads during correction
 
 `-allocated_reads [int] (10000)`
   Maximum number of reads allocated to each thread
 
+`-help`
 
 ### 5. Outputs
 `base_correction.fastq`
@@ -92,3 +93,16 @@ HiFi reads with base error correction
 
 `base_correction_adapter_removal.fastq`
  HiFi reads with base error correction and adapter removal
+
+### 6. Fine tuning of inception-v4 and YOLOv8
+inception-v4:
+You can put your data in the inception/finetune/data.
+```sh
+python inception/finetune/train.py -net inceptionv4 -gpu -b 8 -lr 0.0001
+```
+YOLOv8:
+You can put your data in the yolo/finetune/data.
+```sh
+cd yolo/fintune && pip install -e .
+python yolo/fintune/train.py
+```
