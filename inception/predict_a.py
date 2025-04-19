@@ -2,7 +2,7 @@
 #!/usr/bin/env python3
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+#os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 import argparse
 
@@ -26,22 +26,23 @@ from inception.utils_a import get_network
 
 weights = "inception/weight/inceptionv4.pth"
 
-def find_snp(snp_pic, snp_dir, chr):
+def find_snp(snp_pic, snp_dir, chr, net):
+    #torch.cuda.init()
     #print("in find_snp,"+snp_pic)
     cifar100_pred_loader = get_pred_dataloader(
         imgpath=snp_pic,
-        batch_size=16,
+        batch_size=8,
         num_workers=4,
         shuffle=False
     )
     #print("data load done===============================================================")
 
-    net = get_network()
+    #net = get_network()
     #net.cuda()
     #print("get_network+++++++++++++++++++++++++++++++++++++++")
-    net.load_state_dict(torch.load(weights))
+    #net.load_state_dict(torch.load(weights))
     #print("weights load done===============================================================")
-    net.cuda().eval()
+    #net.cuda().eval()
     #net.eval()
     #print("net load done===============================================================")
 
@@ -54,7 +55,8 @@ def find_snp(snp_pic, snp_dir, chr):
         for n_iter, (image, ims) in enumerate(cifar100_pred_loader):
             #print("iteration: {}\ttotal {} iterations".format(n_iter + 1, len(cifar100_pred_loader)))
 
-            image = image.cuda()
+            #image = image.cuda()
+            image = image.to('cpu')
             #label = label.cuda()
                 
                 
