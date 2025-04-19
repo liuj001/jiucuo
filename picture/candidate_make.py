@@ -12,8 +12,9 @@ def candidate_make(chr,txt_dir, bcf_txt_dir):
             j = ''
             if line_arr[2] != 'N'  :
                 for i in line_arr[4]:
-                    if i == 'a' or i == 't' or i == 'c' or i == 'g' or i == 'A' or i == 'T' or i == 'C' or i == 'G' :
-                        num += 1
+                    if i == 'a' or i == 't' or i == 'c' or i == 'g' or i == 'A' or i == 'T' or i == 'C' or i == 'G' or i == 'G' or i == 'n' or i == 'N':
+                        if i != 'n' and i != 'N':
+                            num += 1
                         indel = 0
                         if num_str != '':
                             num -= int(num_str)
