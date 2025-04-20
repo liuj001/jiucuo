@@ -64,7 +64,7 @@ validate_mutex_params() {
   local value1=$1
   local value2=$2
   if [[ "$value1" -eq 0 && "$value2" -eq 0 ]]; then
-    echo "Error: -error_correction and -adapter_removal cannot both be 0"
+    echo "Error: -error_correction and -adapter_removal cannot both be 0."
     exit 1
   fi
 }
@@ -112,13 +112,13 @@ while [[ $# -gt 0 ]]; do
       exit 1;;
       #shift 2 ;;
     *)             # 处理无效参数
-      echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n\nError: -$1 is invalid."
+      echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n\nError: -$1 is an invalid input."
       exit 1 ;;
   esac
 done
 
 if [ -z "$output" ]; then
-  echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n\nError: mandatory -output is missing."
+  echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n\nError: -output is mandatory and missing."
   exit 1
 fi
 
@@ -137,12 +137,12 @@ Group of Interdisciplinary Information Sciences, School of Software Engineering,
 
 # 检查必要参数是否已输入
 if [ -z "$contigs" ]; then
-  echo "Error: mandatory -contigs is missing."
+  echo "Error: -contigs is mandatory and missing."
   exit 1
 fi
 
 if [ -z "$reads" ]; then
-  echo "Error: mandatory -reads is missing."
+  echo "Error: -reads is mandatory and missing."
   exit 1
 fi
 
