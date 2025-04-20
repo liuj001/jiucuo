@@ -12,13 +12,6 @@ error_correction=1
 adapter_removal=0
 log_file="/JIUCUO_LOG.txt"
 
-if [[ "$1" == "-help" ]]; then
-  echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n"
-  echo -e "Mandatory:\n-reads Raw HiFi reads in FASTQ format\n-contigs Preassembled primary contigs from the reads in FASTA format\n-output Output directory"
-  echo -e "\nOptions (default value):\n-base_correction (1) Base correction in the reads (0 is no base correction and 1 is base correction)\n-adaptor_removal (0) Adapter removal from the reads (0 is no adapter removal and 1 is adapter removal)\n-diameter_size [int] (600) Maximum diameter size in DBSCAN\n-cluster_size [int] (3) Minumum cluster size in DBSCAN\n-k_size [int] (5) Size of k-mer in adapter matching\n-identity_value n (0.6) Identity value in adapter matching\n-threads [int] (8) Number o...
-  exit 0
-fi
-
 # 参数校验函数
 validate_param() {
   local value=$1
@@ -112,6 +105,12 @@ while [[ $# -gt 0 ]]; do
     -adapter_removal)      
       adapter_removal=$2
       shift 2 ;;
+    -help)      
+      echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n"
+      echo -e "Mandatory:\n-reads Raw HiFi reads in FASTQ format\n-contigs Preassembled primary contigs from the reads in FASTA format\n-output Output directory"
+      echo -e "\nOptions (default value):\n-base_correction (1) Base correction in the reads (0 is no base correction and 1 is base correction)\n-adaptor_removal (0) Adapter removal from the reads (0 is no adapter removal and 1 is adapter removal)\n-diameter_size [int] (600) Maximum diameter size in DBSCAN\n-cluster_size [int] (3) Minumum cluster size in DBSCAN\n-k_size [int] (5) Size of k-mer in adapter matching\n-identity_value n (0.6) Identity value in adapter matching\n-threads [int] (8) Number of threads during correction\n-allocated_reads [int] (10000) Maximum number of reads allocated to each thread\n-help"
+      exit 1;;
+      #shift 2 ;;
     *)             # 处理无效参数
       echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n\nError: -$1 is invalid."
       exit 1 ;;
@@ -199,7 +198,7 @@ if [ "$adapter_removal" -eq "$num" ]; then
 
   find "$output$bam_dir" -type f -name "*.bam" | sort | xargs -I {} samtools index {} 2>> "$output/TOOLS_LOG.log"
   
-  python picture/Ex-k4-adapter-thread-v2.py -output "$output" -threads  "$threads"
+  python picture/Ex-k4-adapter-thread-v2.py -output "$output" -threads  "$threads" --error_correction "$error_correction"
 
   file_count=$(ls -1 "$output$bam_csv_dir" | wc -l)
   if [ "$file_count" -eq 1 ]; then
@@ -217,8 +216,8 @@ if [ "$adapter_removal" -eq "$num" ]; then
                --eps "$diameter_size" \
                --min_samples "$cluster_size"\
                --k_size "$k_size"\
-               --adapter_output_dir "$output$adapter_out"
-               --error_correction $error_correction
+               --adapter_output_dir "$output$adapter_out"\
+               --error_correction "$error_correction"
   echo "[$(date '+%F %T')]"
   if [ "$error_correction" -eq 0 ]; then
     python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile "$outfile" -infile "$output$reads" -csv "$output$adapter_out$process_files" -error_correction "$error_correction"
