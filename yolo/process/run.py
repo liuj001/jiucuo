@@ -50,9 +50,9 @@ def process_names_with_processes(names, args):
 
   
     if args.error_correction:
-        st=4
-    else :
         st=6
+    else :
+        st=4
     with tqdm(total=len(names), desc=f'STAGE {st}: Adapter removal', 
              position=0, bar_format="{l_bar}{bar} |") as pbar:
         
