@@ -50,7 +50,7 @@ if isonly == 1:
 else :
     stage_st=6
 
-with tqdm(desc="STAGE {stage_st}: Adapter removal", bar_format="{l_bar}{bar} |") as pbar:
+with tqdm(desc=f'STAGE {stage_st}: Adapter removal', bar_format="{l_bar}{bar} |") as pbar:
     pbar.total = 0  # 初始化总量为 0
     for bam in bamfile:
         pbar.total += 1  # 动态增加总量
