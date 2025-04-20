@@ -59,7 +59,7 @@ def get_network(args):
         from models.inceptionv3 import inceptionv3
         net = inceptionv3()
     elif args.net == 'inceptionv4':
-        from models.inceptionv4 import inceptionv4
+        from inceptionv4 import inceptionv4
         net = inceptionv4()
     elif args.net == 'inceptionresnetv2':
         from models.inceptionv4 import inception_resnet_v2
@@ -253,16 +253,17 @@ def get_training_dataloader(mean, std, batch_size=16, num_workers=2, shuffle=Tru
     Returns: train_data_loader:torch dataloader object
     """
 
-    labelpath = "inception/data/train_l"
+    labelpath = "inception/finetune/data/train_l"
     labelfiles = os.listdir(labelpath)
     # labelpath30 = "/root/autodl-tmp/whb/NA12878/label_chr20_d30"
     # labelfiles30= os.listdir(labelpath30)
-    imgpath = "inception/data/train_i"
+    imgpath = "inception/finetune/data/train_i"
     imgfiles= os.listdir(imgpath)
     # imgpath30 = "/root/autodl-tmp/whb/NA12878/images_chr20_d30"
     # imgfiles30= os.listdir(imgpath30)
 
     imgfiles = list(filter(file_filter, imgfiles))
+    labelfiles = list(filter(j_filter, labelfiles))
     # imgfiles30 = list(filter(file_filter, imgfiles30))
 
     all_imgs_path = []
@@ -331,17 +332,18 @@ def get_val_dataloader(mean, std, batch_size=16, num_workers=2, shuffle=True):
         shuffle: whether to shuffle
     Returns: cifar100_test_loader:torch dataloader object
     """
-    labelpath = "inception/data/val_l"
+    labelpath = "inception/finetune/data/val_l"
     labelfiles= os.listdir(labelpath)
     # labelpath30 = "/root/autodl-tmp/pytorch-cifar100/data/val_l30"
     # labelfiles30= os.listdir(labelpath30)
     
-    imgpath = "inception/data/val_i"
+    imgpath = "inception/finetune/data/val_i"
     imgfiles= os.listdir(imgpath)
     # imgpath30 = "/root/autodl-tmp/pytorch-cifar100/data/val_i30"
     # imgfiles30= os.listdir(imgpath30) 
 
     imgfiles = list(filter(file_filter, imgfiles))
+    labelfiles = list(filter(j_filter, labelfiles))
     # imgfiles30 = list(filter(file_filter, imgfiles30))
 
     all_imgs_path = []
@@ -443,6 +445,12 @@ def get_pred_dataloader(batch_size=16, num_workers=2, shuffle=False):
 
 def file_filter(f):
     if f[-4:] in ['.npy']:
+        return True
+    else:
+        return False
+
+def j_filter(f):
+    if f[-5:] in ['.json']:
         return True
     else:
         return False
