@@ -74,7 +74,7 @@ if __name__ == '__main__':
     #         for future in futures:
     #             future.result()
     #             pbar.update(1)
-    if errc=1:
+    if errc==1:
         stage_st=5
     else :
         stage_st=3
