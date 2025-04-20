@@ -19,9 +19,11 @@ from add_pos import add_pos
 parser=argparse.ArgumentParser(description='runJiuCuo.py integrates the processes of error correction.')
 parser.add_argument('-output',type=str,help='Output directory',required=True)
 parser.add_argument('-threads',type=int,help='Number of threads during correction',default=8)
+parser.add_argument('-error_correction',type=int,help='Error correction',default=1)
 args=parser.parse_args()
 outdir = args.output
 thread = args.threads
+errc = args.error_correction
 
 bam = outdir+'/raw.bam'
 bam_dir = outdir+'/bam'
@@ -72,8 +74,11 @@ if __name__ == '__main__':
     #         for future in futures:
     #             future.result()
     #             pbar.update(1)
-
-    with tqdm(total=len(chr_l), desc="STAGE 5: SNP-aware adapter removal", bar_format="{l_bar}{bar} |") as pbar:
+    if errc=1:
+        stage_st=5
+    else :
+        stage_st=3
+    with tqdm(total=len(chr_l), desc=f'STAGE {stage_st}: Adapter detection', bar_format="{l_bar}{bar} |") as pbar:
         with ProcessPoolExecutor(max_workers=thread) as executor:
             futures = [executor.submit(run_adapter, chr) for chr in chr_l]
             # 按任务完成顺序处理
