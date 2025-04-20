@@ -198,7 +198,7 @@ if [ "$adapter_removal" -eq "$num" ]; then
 
   find "$output$bam_dir" -type f -name "*.bam" | sort | xargs -I {} samtools index {} 2>> "$output/TOOLS_LOG.log"
   
-  python picture/Ex-k4-adapter-thread-v2.py -output "$output" -threads  "$threads" --error_correction "$error_correction"
+  python picture/Ex-k4-adapter-thread-v2.py -output "$output" -threads  "$threads" -error_correction "$error_correction"
 
   file_count=$(ls -1 "$output$bam_csv_dir" | wc -l)
   if [ "$file_count" -eq 1 ]; then
