@@ -133,21 +133,21 @@ def error_correct(chr):
                 txt_p=subprocess.Popen(txt_cmd,shell=True, stdout=log, stderr=log)
                 txt_code=txt_p.wait()  #等待子进程结束，并返回状态码;
         
-        snp_pic_dir = snp_c_dir+'/'+chr
-        txt_file = txt_dir + '/' + chr + '.txt'
-        sz = os.path.getsize(txt_file)
 
         #判断文件是否完整
-        with open(txt_file, "rb") as f:
-            f.seek(-1, 2)  # 定位到文件末尾前1字节
-            last_char = f.read(1)
-            # print("有换行符" if last_char == b'\n' else "无换行符")
-        if not sz or last_char != b'\n':
-            print(chr + "had be killed")
-            end = time()
-            #print(chr,"done!", f'time: {end - start:.3f}s.=========================')
-        else:  
-            if error_correction == 1:
+        if error_correction == 1:
+            snp_pic_dir = snp_c_dir+'/'+chr
+            txt_file = txt_dir + '/' + chr + '.txt'
+            sz = os.path.getsize(txt_file)
+            with open(txt_file, "rb") as f:
+                f.seek(-1, 2)  # 定位到文件末尾前1字节
+                last_char = f.read(1)
+                # print("有换行符" if last_char == b'\n' else "无换行符")
+            if not sz or last_char != b'\n':
+                print(chr + "had be killed")
+                end = time()
+                #print(chr,"done!", f'time: {end - start:.3f}s.=========================')
+            else:  
                 # print(chr,"make candidate =========================")  
                 candidate_make(chr, txt_dir, bcf_txt_dir)
                 bcf_file = bcf_txt_dir + '/' + chr + '.bcf.txt'
@@ -313,8 +313,6 @@ if __name__ == '__main__':
         chr_n = chr_file.readlines()
 
     # 创建进度条
-    local_time = strftime("%Y-%m-%d %H:%M:%S", localtime())
-    print(local_time)
     # with tqdm(total=len(chr_n), desc="STAGE 2: SNP-aware error correction task allocation", bar_format="{l_bar}{bar} |") as pbar:
     #     with ProcessPoolExecutor(max_workers=thread) as executor:  # Changed to ProcessPoolExecutor
     #         futures = [executor.submit(spilt, chr) for chr in chr_n]
@@ -322,6 +320,8 @@ if __name__ == '__main__':
     #             future.result()
     #             pbar.update(1)
     if error_correction == 1:
+        local_time = strftime("%Y-%m-%d %H:%M:%S", localtime())
+        print(local_time)
         with tqdm(total=len(chr_n), desc="STAGE 2: Read preprocessing", bar_format="{l_bar}{bar} |") as pbar:
             with ProcessPoolExecutor(max_workers=thread) as executor:
                 futures = [executor.submit(spilt, chr) for chr in chr_n]
@@ -329,13 +329,13 @@ if __name__ == '__main__':
                 for future in as_completed(futures):  # 动态监听完成事件
                     result = future.result()         # 获取已完成任务的结果
                     pbar.update(1) 
-    else:
+    
+    elif error_correction == 0:
         with ProcessPoolExecutor(max_workers=thread) as executor:
             futures = [executor.submit(spilt, chr) for chr in chr_n]
             # 按任务完成顺序处理
             for future in as_completed(futures):  # 动态监听完成事件
-                result = future.result()         # 获取已完成任务的结果
-                pbar.update(1)   
+                result = future.result()         # 获取已完成任务的结果 
 
     end_spilt = time()
     
@@ -363,7 +363,7 @@ if __name__ == '__main__':
                 for future in as_completed(futures):  # 动态监听完成事件
                     result = future.result()         # 获取已完成任务的结果
                     pbar.update(1)                  # 立即更新进度条              # 立即更新进度条
-    else:
+    elif error_correction == 0:
         with tqdm(total=len(chr_l), desc="STAGE 2: Read preprocessing", bar_format="{l_bar}{bar} |") as pbar:
             with ProcessPoolExecutor(max_workers=thread) as executor:
                 futures = [executor.submit(error_correct, chr) for chr in chr_l]
@@ -427,6 +427,3 @@ if __name__ == '__main__':
         end_read = time()
         
         end = time()
-    
-    
-    
