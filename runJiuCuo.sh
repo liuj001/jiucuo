@@ -184,6 +184,8 @@ corr_fq="/base_correction.fastq"
 infile="$output$corr_fq"
 corr_a_fq="/base_correction_adapter_removal.fastq"
 outfile="$output$corr_a_fq"
+ar_fq="/adapter_removal.fastq"
+outfile_ar="$output$ar_fq"
 adapter="/adapter"
 adapter_out="/adapter_out"
 process_files="/adapter_remove.csv"
@@ -220,7 +222,7 @@ if [ "$adapter_removal" -eq "$num" ]; then
                --error_correction "$error_correction"
   echo "[$(date '+%F %T')]"
   if [ "$error_correction" -eq 0 ]; then
-    python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile "$outfile" -infile "$reads" -csv "$output$adapter_out$process_files" -error_correction "$error_correction"
+    python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile_ar "$outfile_ar" -infile "$reads" -csv "$output$adapter_out$process_files" -error_correction "$error_correction"
   else
     python correction/adapter_locate-v2.py -bam "$output$bam_m" -outfile "$outfile" -infile "$infile" -csv "$output$adapter_out$process_files" -error_correction "$error_correction"
   fi
