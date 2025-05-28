@@ -257,6 +257,19 @@ def spilt(chr):
 #     os.system(split_cmd) #得到该bam文件的所有染色体号
 
 def bam_file():
+    if not os.path.exists(outdir + '/raw.bam.bai'):
+        index_cmd = f"samtools index {outdir}/raw.bam {outdir}/raw.bam.bai"
+        with open(log_file, "a") as log:
+            index_p = subprocess.Popen(index_cmd, shell=True, stdout=log, stderr=log)
+            index_p.wait()
+
+    bam_file = pysam.AlignmentFile(bam, "rb")
+    mapped_reads = bam_file.mapped  # 获取比对上的 read 数
+    bam_file.close()
+    if mapped_reads == 0:
+        print(f"No reads are mapped in the BAM file '{bam}'.")
+        sys.exit(1)
+
     if not os.path.exists(ref + '.fai'):
         faidx_cmd = f"samtools faidx {ref}"
         with open(log_file, "a") as log:
