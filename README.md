@@ -26,6 +26,7 @@ Then follow the steps below to install JiuCuo.
 git clone https://github.com/liuj001/jiucuo.git
 cd jiucuo
 conda env create -f JiuCuo.yml
+conda activate JiuCuo
 pip install https://download.pytorch.org/whl/cu111/torch-1.8.1%2Bcu111-cp38-cp38-linux_x86_64.whl -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 pip install https://download.pytorch.org/whl/cu111/torchvision-0.9.1%2Bcu111-cp38-cp38-linux_x86_64.whl  -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 pip install pysam
