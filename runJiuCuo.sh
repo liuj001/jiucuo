@@ -222,7 +222,7 @@ if [ "$adapter_removal" -eq "$num" ]; then
                --error_correction "$error_correction"
   echo "[$(date '+%F %T')]"
   if [ "$error_correction" -eq 0 ]; then
-    python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile_ar "$outfile_ar" -infile "$reads" -csv "$output$adapter_out$process_files" -error_correction "$error_correction"
+    python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile "$outfile_ar" -infile "$reads" -csv "$output$adapter_out$process_files" -error_correction "$error_correction"
   else
     python correction/adapter_locate-v2.py -bam "$output$bam_m" -outfile "$outfile" -infile "$infile" -csv "$output$adapter_out$process_files" -error_correction "$error_correction"
   fi
