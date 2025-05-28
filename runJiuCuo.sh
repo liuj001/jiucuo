@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 identity_value=0.6
 threads=8
 diameter_size=600
@@ -145,7 +145,17 @@ if [ -z "$reads" ]; then
   echo "Error: -reads is mandatory and missing."
   exit 1
 fi
+# 检查 contigs 文件是否存在且非空
+if [ ! -s "$contigs" ]; then
+  echo "Error: contigs file '$contigs' does not exist or is empty."
+  exit 1
+fi
 
+# 检查 reads 文件是否存在且非空
+if [ ! -s "$reads" ]; then
+  echo "Error: reads file '$reads' does not exist or is empty."
+  exit 1
+fi
 # 参数验证
 validate_param "$identity_value" 0 1 "identity_value" 0
 validate_param "$diameter_size" 0 5000 "diameter_size" 1
