@@ -49,6 +49,7 @@ allocated_reads = args.allocated_reads
 error_correction = args.error_correction
 
 bam = outdir+'/raw.bam'
+bam_f = outdir+'/filt.bam'
 bam_dir = outdir+'/bam'
 txt_dir = outdir+'/txt'
 # txt_add_dir = outdir+'/txt_add'
@@ -178,7 +179,7 @@ def spilt(chr):
     start = time()
     if not os.path.exists(bam_dir+'/'+chr+'_1.bam'):
         if not os.path.exists(bam_dir+'/'+chr+'.bam'):
-            bam_cmd = "samtools view -@ 12 -b %s/filt.bam %s > %s/%s.bam"%(outdir, chr, bam_dir, chr)
+            bam_cmd = "samtools view -@ %s -b %s/filt.bam %s > %s/%s.bam"%(thread, outdir, chr, bam_dir, chr)
             with open(log_file, "a") as log:
                 bam_p=subprocess.Popen(bam_cmd,shell=True, stdout=log, stderr=log)
                 bam_code=bam_p.wait()  #等待子进程结束，并返回状态码;
@@ -234,14 +235,14 @@ def spilt(chr):
 #     #samtools faidx /root/autodl-tmp/HG002/hifiasm/m64012_190920_173625.raw.bp.p_ctg.fa
 #     if not os.path.exists(outdir+'/sort.bam'):
 #         #print("Sort bam")
-#         sort_cmd = "samtools sort -@ 48 %s > %s/sort.bam"%(bam,outdir)
+#         sort_cmd = "samtools sort -@ %s %s > %s/sort.bam"%(thread,bam,outdir)
 #         sort_p=subprocess.Popen(sort_cmd,shell=True)
 #         sort_code=sort_p.wait()  #等待子进程结束，并返回状态码；
 #         #print("Done!")
 #     #samtools sort -@ 48 -o /root/autodl-tmp/test/A.tha_hifiasm/CRR302668.asm.sort.bam /root/autodl-tmp/test/A.tha_hifiasm/CRR302668.asm.bam
 #     if not os.path.exists(outdir+'/filt.bam'):
 #         #print("Filt bam")
-#         filt_cmd = "samtools view -@ 48 -b -F 4 -F 256 -F 2048 %s/sort.bam > %s/filt.bam"%(outdir,outdir)
+#         filt_cmd = "samtools view -@ %s -b -F 4 -F 256 -F 2048 %s/sort.bam > %s/filt.bam"%(thread,outdir,outdir)
 #         filt_p=subprocess.Popen(filt_cmd,shell=True)
 #         filt_code=filt_p.wait()  #等待子进程结束，并返回状态码；
 #         #print("Done!")
@@ -257,19 +258,6 @@ def spilt(chr):
 #     os.system(split_cmd) #得到该bam文件的所有染色体号
 
 def bam_file():
-    if not os.path.exists(outdir + '/raw.bam.bai'):
-        index_cmd = f"samtools index {outdir}/raw.bam {outdir}/raw.bam.bai"
-        with open(log_file, "a") as log:
-            index_p = subprocess.Popen(index_cmd, shell=True, stdout=log, stderr=log)
-            index_p.wait()
-
-    bam_file = pysam.AlignmentFile(bam, "rb")
-    mapped_reads = bam_file.mapped  # 获取比对上的 read 数
-    bam_file.close()
-    if mapped_reads == 0:
-        print(f"No reads are mapped in the BAM file '{bam}'.")
-        sys.exit(1)
-
     if not os.path.exists(ref + '.fai'):
         faidx_cmd = f"samtools faidx {ref}"
         with open(log_file, "a") as log:
@@ -277,13 +265,13 @@ def bam_file():
             faidx_p.wait()
 
     if not os.path.exists(outdir + '/sort.bam'):
-        sort_cmd = f"samtools sort -@ 48 {bam} > {outdir}/sort.bam"
+        sort_cmd = f"samtools sort -@ {thread} {bam} > {outdir}/sort.bam"
         with open(log_file, "a") as log:
             sort_p = subprocess.Popen(sort_cmd, shell=True, stdout=log, stderr=log)
             sort_p.wait()
 
     if not os.path.exists(outdir + '/filt.bam'):
-        filt_cmd = f"samtools view -@ 48 -b -F 4 -F 256 -F 2048 {outdir}/sort.bam > {outdir}/filt.bam"
+        filt_cmd = f"samtools view -@ {thread} -b -F 4 -F 256 -F 2048 {outdir}/sort.bam > {outdir}/filt.bam"
         with open(log_file, "a") as log:
             filt_p = subprocess.Popen(filt_cmd, shell=True, stdout=log, stderr=log)
             filt_p.wait()
@@ -293,7 +281,12 @@ def bam_file():
         with open(log_file, "a") as log:
             index_p = subprocess.Popen(index_cmd, shell=True, stdout=log, stderr=log)
             index_p.wait()
-
+    bam_file = pysam.AlignmentFile(bam_f, "rb")
+    mapped_reads = bam_file.mapped  # 获取比对上的 read 数
+    bam_file.close()
+    if mapped_reads == 0:
+        print(f"No reads are mapped in the BAM file '{bam}'.")
+        sys.exit(1)
     split_cmd = f"samtools view -H {bam} | cut -f 2 | grep SN | cut -f 2 -d ':' > {txt_dir}/chr.txt"
     with open(log_file, "a") as log:
         os.system(split_cmd)
