@@ -99,7 +99,8 @@ def filter_csv(input_file_1, input_file_2, output_file):
             # combine the first file first key and the second key
             if f"{row[0]},{row[1]}" in a:
                 writer.writerow(row)
-                writer1.writerow([row[16]])
+                if len(row)>15:
+                    writer1.writerow([row[16]])
 
     # print(f"Result data has been saved to {output_file}")
 
