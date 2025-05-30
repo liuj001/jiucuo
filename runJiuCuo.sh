@@ -35,8 +35,53 @@ validate_param() {
   fi
 
   # 使用 awk 进行小数范围比较
-  if ! awk -v val="$value" -v min="$min" -v max="$max" 'BEGIN {exit !(val >= min && val <= max)}'; then
-    echo "Error: option -$name needs to be between $min and $max."
+  if ! awk -v val="$value" -v min="$min" -v max="$max" 'BEGIN {exit !(val > min && val <= max)}'; then
+    echo "Error: option -$name needs to be ($min, $max]."
+    exit 1
+  fi
+}
+
+# 检查文件扩展名是否符合预期
+check_file_extension() {
+  local file="$1"
+  local name="$2"
+  local valid_extensions=("${@:3}")
+  local matched=0
+
+  for ext in "${valid_extensions[@]}"; do
+    if [[ "$file" == *"$ext" ]]; then
+      matched=1
+      break
+    fi
+  done
+
+  if [[ "$matched" -eq 0 ]]; then
+    echo "Error: -$name file '$file' does not have a valid extension (${valid_extensions[*]})."
+    exit 1
+  fi
+}
+
+# 检查 FASTQ 格式是否有效（每条 read 是 4 行）
+validate_fastq_format() {
+  local file="$1"
+  local total_lines
+  total_lines=$(wc -l < "$file")
+  
+  if (( total_lines % 4 != 0 )); then
+    echo "Error: FASTQ file '$file' has invalid format."
+    exit 1
+  fi
+  if ! grep -q '^@' "$file"; then
+    echo "Error: FASTQ file '$file' has invalid format."
+    exit 1
+  fi
+}
+
+# 检查 FASTA 格式是否包含至少一个 '>' 开头的记录
+validate_fasta_format() {
+  local file="$1"
+  if ! grep -q '^>' "$file"; then
+    echo "Error: FASTA file '$file' has invalid format."
     exit 1
   fi
 }
@@ -112,7 +157,7 @@ while [[ $# -gt 0 ]]; do
       exit 1;;
       #shift 2 ;;
     *)             # 处理无效参数
-      echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n\nError: -$1 is an invalid input."
+      echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n\nError: $1 is an invalid input."
       exit 1 ;;
   esac
 done
@@ -145,6 +190,9 @@ if [ -z "$reads" ]; then
   echo "Error: -reads is mandatory and missing."
   exit 1
 fi
+# 检查文件扩展名
+check_file_extension "$reads" "reads" ".fastq" ".fq"
+check_file_extension "$contigs" "contigs" ".fa" ".fasta"
 # 检查 contigs 文件是否存在且非空
 if [ ! -s "$contigs" ]; then
   echo "Error: contigs file '$contigs' does not exist or is empty."
@@ -156,13 +204,20 @@ if [ ! -s "$reads" ]; then
   echo "Error: reads file '$reads' does not exist or is empty."
   exit 1
 fi
+
+# 检查 reads 文件内容是否为 FASTQ
+validate_fastq_format "$reads"
+
+# 检查 contigs 文件内容是否为 FASTA
+validate_fasta_format "$contigs"
+
 # 参数验证
 validate_param "$identity_value" 0 1 "identity_value" 0
 validate_param "$diameter_size" 0 5000 "diameter_size" 1
-validate_param "$cluster_size" 2 10 "cluster_size" 1
-validate_param "$threads" 1 100 "threads" 1
-validate_param "$k_size" 1 30 "k_size" 1
-validate_param "$allocated_reads" 100 1000000 "allocated_reads" 1
+validate_param "$cluster_size" 1 10 "cluster_size" 1
+validate_param "$threads" 0 100 "threads" 1
+validate_param "$k_size" 0 30 "k_size" 1
+validate_param "$allocated_reads" 99 1000000 "allocated_reads" 1
 validate_adapter_removal "$adapter_removal"
 validate_error_correction "$error_correction"
 validate_mutex_params "$error_correction" "$adapter_removal"
@@ -170,7 +225,7 @@ validate_mutex_params "$error_correction" "$adapter_removal"
 echo "STAGE 1: Minimap2 alignment"
 # 运行 minimap2 和 samtools
 if [ ! -f "$output$bam" ]; then
-  minimap2 -t32 -ax map-hifi "$contigs" "$reads" 2>> "$output/TOOLS_LOG.log" | samtools view -@ 48 -bS > "$output$bam"
+  minimap2 -t"$threads" -ax map-hifi "$contigs" "$reads" 2>> "$output/TOOLS_LOG.log" | samtools view -@ 48 -bS > "$output$bam"
 fi
 
 num=1
