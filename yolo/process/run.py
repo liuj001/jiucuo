@@ -116,9 +116,9 @@ if __name__ == "__main__":
         args.output_detection_csv_path = os.path.join(args.adapter_output_dir,"detection_results.csv")
     
     # check min_samples is valid
-    while args.min_samples is not None and (args.min_samples < 2):
-        print("Error: The min_samples value should more than 1, input again")
-        args.min_samples = int(input("Please enter a (int) valid min_samples value (more than 1): "))
+    # while args.min_samples is not None and (args.min_samples < 2):
+    #     print("Error: The min_samples value should more than 1, input again")
+    #     args.min_samples = int(input("Please enter a (int) valid min_samples value (more than 1): "))
     
     # check similarity is valid
     while args.similarity is not None and (args.similarity < 0 or args.similarity > 1):
