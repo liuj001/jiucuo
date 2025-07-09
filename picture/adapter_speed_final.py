@@ -93,6 +93,9 @@ def adapter_pic(bam_dir, adapter_dir, chr):
                 pos = bamlines[i][0] - start
                 #每一条向后遍历
                 for ci in bamlines[i][1]:
+                    if pos + ci[1] >= length:
+                        print('warning: read too long')
+                        break
                     if ci[0] == 0:
                         img_all[i*2][pos:pos+ci[1]] = 1
                         pos += ci[1]
@@ -109,11 +112,11 @@ def adapter_pic(bam_dir, adapter_dir, chr):
                     #     #记录生成图的位置
                     #     flag_save.append(pos-1)
                 #补尾
-                if bamlines[i][1][-1][0] == 4 and bamlines[i][1][-1][1] >= 30:
+                if bamlines[i][1][-1][0] == 4 and bamlines[i][1][-1][1] >= 30 and pos - 1 < length:
                     img_all[i*2][pos-1] = 0 - min(bamlines[i][1][-1][1],45)
                     flag_save.append(pos - 1)
                 #补头
-                if bamlines[i][1][0][0] == 4 and bamlines[i][1][0][1] >= 30:
+                if bamlines[i][1][0][0] == 4 and bamlines[i][1][0][1] >= 30 and bamlines[i][0] - start < length:
                     img_all[i*2][bamlines[i][0] - start] = 0 - min(bamlines[i][1][0][1],45)
                     flag_save.append(bamlines[i][0] - start)
             #判断生成图条件
@@ -130,6 +133,8 @@ def adapter_pic(bam_dir, adapter_dir, chr):
                             if len(flag_save) == 0:
                                 break
                         #再开始生成图
+                        if j + 445 >= length:
+                            break
                         img_a.fill(0)
                         img_a[:,:445] = img_all[:,j:j+445]
                         #如果当前没图则退出
