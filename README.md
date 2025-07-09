@@ -12,7 +12,7 @@ JiuCuo is under the Artistic License 2.0.
 
 ### 1. System requirements
 
-JiuCuo is suitable for 32-bit or 64-bit machines with Linux operating systems. JiuCuo usually uses no more than 40 GB memory.
+JiuCuo is suitable for 32-bit or 64-bit machines with Linux Ubantu operating systems. JiuCuo usually uses no more than 40 GB memory, but needs relatively large disk space to store generated images.
 
 ### 2. Installation
 If Git LFS is not installed, please follow the steps below to install it.
@@ -97,3 +97,14 @@ You could fine-tune YOLO-v8 by putting your data under `yolo/finetune/data`.
 pip install -e yolo/finetune/.
 python yolo/finetune/train.py -b 1 -lr 0.01
 ```
+
+### 7. Frequently asked questions
+
+(1) Why is there an error during installation?
+
+Please check and make sure the Linux system is Ubantu, the Internet is connected, and the disk usage does not exceed the limit.
+
+(2) Why is there an error during running?
+
+Please check and make sure the disk usage does not exceed the limit.
+
