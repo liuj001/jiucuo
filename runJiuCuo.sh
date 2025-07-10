@@ -232,7 +232,7 @@ validate_mutex_params "$error_correction" "$adapter_removal"
 echo "STAGE 1: Minimap2 alignment"
 # 运行 minimap2 和 samtools
 if [ ! -f "$output$bam" ]; then
-  minimap2 -t"$threads" -ax map-hifi "$contigs" "$reads" 2>> "$output/TOOLS_LOG.log" | samtools view -@ 48 -bS > "$output$bam"
+  minimap2 -t"$threads" -ax map-hifi "$contigs" "$reads" 2>> "$output/TOOLS_LOG.log" | samtools view -@ "$threads" -bS > "$output$bam"
 fi
 
 num=1
