@@ -94,7 +94,6 @@ def adapter_pic(bam_dir, adapter_dir, chr):
                 #每一条向后遍历
                 for ci in bamlines[i][1]:
                     if pos + ci[1] >= length:
-                        print('warning: read too long')
                         break
                     if ci[0] == 0:
                         img_all[i*2][pos:pos+ci[1]] = 1
