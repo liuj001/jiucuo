@@ -162,8 +162,15 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+
+
 if [ -z "$output" ]; then
   echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing\nJiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao\nGroup of Interdisciplinary Information Sciences, School of Software Engineering, Beijing Jiaotong University\n\nError: -output is mandatory and missing."
+  exit 1
+fi
+
+if [ -d "$output" ]; then
+  echo "Error: directory '$output' already exists. Please specify a new directory name." 
   exit 1
 fi
 
