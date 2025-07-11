@@ -20,8 +20,8 @@ Please follow the steps below to install JiuCuo.
 ```sh
 git clone https://github.com/liuj001/jiucuo.git
 pip install -U huggingface_hub
-huggingface-cli download mingfeidf/JiuCuo  inceptionv4.pth  --local-dir inception/weight/ --local-dir-use-symlinks False --resume-download --force-download
-huggingface-cli download mingfeidf/JiuCuo  best.pt  --local-dir yolo/process --local-dir-use-symlinks False --resume-download --force-download
+huggingface-cli download mingfeidf/JiuCuo  inceptionv4.pth  --local-dir jiucuo/inception/weight/ --local-dir-use-symlinks False --resume-download --force-download
+huggingface-cli download mingfeidf/JiuCuo  best.pt  --local-dir jiucuo/yolo/process --local-dir-use-symlinks False --resume-download --force-download
 cd jiucuo
 conda env create -f JiuCuo.yml
 conda activate JiuCuo
