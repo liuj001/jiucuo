@@ -1,0 +1,12 @@
+{
+  "version": "5.2.1",
+  "flags": {
+    "snp": true,
+    "nosnp": false
+  },
+  "shapes": [],
+  "imagePath": "..\\images\\snp936537.png",
+  "imageData": null,
+  "imageHeight": 450,
+  "imageWidth": 34
+}

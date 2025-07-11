@@ -1,0 +1,10 @@
+train: datasets/data/adapter/images/train
+test:  datasets/data/adapter/images/test
+val:   datasets/data/adapter/images/val
+
+
+#如果按照上述方式建立文件夹，则上面train、test和val地址可以不变
+
+nc: 1
+names: ['object']
+
