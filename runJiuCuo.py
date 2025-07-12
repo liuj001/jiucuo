@@ -325,17 +325,30 @@ if __name__ == '__main__':
     #         for future in futures:
     #             future.result()
     #             pbar.update(1)
+    # if error_correction == 1:
+    #     local_time = strftime("%Y-%m-%d %H:%M:%S", localtime())
+    #     print(local_time)
+    #     with tqdm(total=len(chr_n), desc="STAGE 2: Read preprocessing", bar_format="{l_bar}{bar} |") as pbar:
+    #         with ProcessPoolExecutor(max_workers=thread) as executor:
+    #             futures = [executor.submit(spilt, chr) for chr in chr_n]
+    #             # 按任务完成顺序处理
+    #             for future in as_completed(futures):  # 动态监听完成事件
+    #                 result = future.result()         # 获取已完成任务的结果
+    #                 pbar.update(1) 
+    
     if error_correction == 1:
         local_time = strftime("%Y-%m-%d %H:%M:%S", localtime())
-        print(local_time)
-        with tqdm(total=len(chr_n), desc="STAGE 2: Read preprocessing", bar_format="{l_bar}{bar} |") as pbar:
+        print(f'[{local_time}]')
+        # with tqdm(total=len(chr_n), desc="STAGE 2: Read preprocessing", bar_format="{l_bar}{bar} |") as pbar:
+        print(f'STAGE 2: Read preprocessing')
+        for t in range(1):
             with ProcessPoolExecutor(max_workers=thread) as executor:
                 futures = [executor.submit(spilt, chr) for chr in chr_n]
                 # 按任务完成顺序处理
                 for future in as_completed(futures):  # 动态监听完成事件
                     result = future.result()         # 获取已完成任务的结果
-                    pbar.update(1) 
-    
+                    # pbar.update(1) 
+                    
     elif error_correction == 0:
         with ProcessPoolExecutor(max_workers=thread) as executor:
             futures = [executor.submit(spilt, chr) for chr in chr_n]
@@ -354,7 +367,8 @@ if __name__ == '__main__':
 
     # 创建进度条
     local_time = strftime("%Y-%m-%d %H:%M:%S", localtime())
-    print(local_time)
+    # print(local_time)
+    print(f'[{local_time}]')
     # with tqdm(total=len(chr_l), desc="STAGE 3: SNP-aware error correction", bar_format="{l_bar}{bar} |") as pbar:
     #     with ProcessPoolExecutor(max_workers=thread) as executor:  # Changed to ProcessPoolExecutor
     #         futures = [executor.submit(error_correct, chr) for chr in chr_l]
@@ -362,21 +376,25 @@ if __name__ == '__main__':
     #             future.result()
     #             pbar.update(1)
     if error_correction == 1:
-        with tqdm(total=len(chr_l), desc="STAGE 3: SNP-aware error detection", bar_format="{l_bar}{bar} |") as pbar:
+        # with tqdm(total=len(chr_l), desc="STAGE 3: SNP-aware error detection", bar_format="{l_bar}{bar} |") as pbar:
+        print(f'STAGE 3: SNP-aware error detection')
+        for t in range(1):
             with ProcessPoolExecutor(max_workers=thread) as executor:
                 futures = [executor.submit(error_correct, chr) for chr in chr_l]
                 # 按任务完成顺序处理
                 for future in as_completed(futures):  # 动态监听完成事件
                     result = future.result()         # 获取已完成任务的结果
-                    pbar.update(1)                  # 立即更新进度条              # 立即更新进度条
+                    # pbar.update(1)                  # 立即更新进度条              # 立即更新进度条
     elif error_correction == 0:
-        with tqdm(total=len(chr_l), desc="STAGE 2: Read preprocessing", bar_format="{l_bar}{bar} |") as pbar:
+        # with tqdm(total=len(chr_l), desc="STAGE 2: Read preprocessing", bar_format="{l_bar}{bar} |") as pbar:
+        print(f'STAGE 2: Read preprocessing')
+        for t in range(1):
             with ProcessPoolExecutor(max_workers=thread) as executor:
                 futures = [executor.submit(error_correct, chr) for chr in chr_l]
                 # 按任务完成顺序处理
                 for future in as_completed(futures):  # 动态监听完成事件
                     result = future.result()         # 获取已完成任务的结果
-                    pbar.update(1)                  # 立即更新进度条              # 立即更新进度条
+                    # pbar.update(1)                  # 立即更新进度条              # 立即更新进度条
 
 
     end_error = time()
@@ -398,25 +416,28 @@ if __name__ == '__main__':
         start_read = time()
         # 显示拼接进度
         local_time = strftime("%Y-%m-%d %H:%M:%S", localtime())
-        print(local_time)
-        with tqdm(total=3, desc="STAGE 4: SNP-aware error correction", bar_format="{l_bar}{bar} |") as pbar:
+        # print(local_time)
+        print(f'[{local_time}]')
+        # with tqdm(total=3, desc="STAGE 4: SNP-aware error correction", bar_format="{l_bar}{bar} |") as pbar:
+        print(f'STAGE 4: SNP-aware error correction')
+        for t in range(1):
             read_cmd = "cat %s/*.fastq > %s/reads_c.fastq" % (c_reads_dir, outdir)
             with open(log_file, "a") as log:
                 read_p = subprocess.Popen(read_cmd, shell=True, stdout=log, stderr=log)
                 read_code = read_p.wait()
-            pbar.update(1)
+            # pbar.update(1)
     
             com_cmd = "seqkit common %s %s/reads_c.fastq | seqkit seq -n -i -o %s/common.txt" % (reads_path, outdir, outdir)
             with open(log_file, "a") as log:
                 com_p = subprocess.Popen(com_cmd, shell=True, stdout=log, stderr=log)
                 com_code = com_p.wait()
-            pbar.update(1)
+            # pbar.update(1)
     
             rem_cmd = "seqkit grep -v -f %s/common.txt %s -o %s/s.fastq" % (outdir, reads_path, outdir)
             with open(log_file, "a") as log:
                 rem_p = subprocess.Popen(rem_cmd, shell=True, stdout=log, stderr=log)
                 rem_code = rem_p.wait()
-            pbar.update(1)
+            # pbar.update(1)
     
         t = outdir + "/common.txt"
         os.remove(t)
