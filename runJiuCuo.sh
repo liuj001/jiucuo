@@ -292,7 +292,7 @@ if [ "$adapter_removal" -eq "$num" ]; then
                --k_size "$k_size"\
                --adapter_output_dir "$output$adapter_out"\
                --error_correction "$error_correction"
-  echo "[$(date '+%F %T')]"
+  # echo "[$(date '+%F %T')]"
   if [ "$error_correction" -eq 0 ]; then
     python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile "$outfile_ar" -infile "$reads" -csv "$output$adapter_out$process_files" -error_correction "$error_correction"
   else
