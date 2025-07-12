@@ -11,6 +11,8 @@ from tqdm import tqdm
 import torch
 
 def images_inference(image_dir, output_image_dir, output_csv_path,st):
+   
+    os.environ["ULTRALYTICS_SETTINGS_VERBOSE"] = "false"
     # Load the pre-trained YOLO model
     device = torch.device("cuda:0")
     
@@ -30,7 +32,9 @@ def images_inference(image_dir, output_image_dir, output_csv_path,st):
     else :
         stage_st=3
     # Use tqdm to show a progress bar for the loop
-    for image_path in tqdm(image_paths, desc=f'STAGE {stage_st}: Adapter detection',bar_format="{l_bar}{bar} |"):  # Add tqdm progress bar
+    # for image_path in tqdm(image_paths, desc=f'STAGE {stage_st}: Adapter detection',bar_format="{l_bar}{bar} |"):  # Add tqdm progress bar
+    # print(f'STAGE {stage_st}: Adapter detection')
+    for image_path in image_paths:
         result = model(image_path, verbose=False)  # Run inference on a single image
         image_name = os.path.basename(image_path)
         boxes = result[0].boxes
