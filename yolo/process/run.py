@@ -53,8 +53,9 @@ def process_names_with_processes(names, args):
         st=6
     else :
         st=4
-    with tqdm(total=len(names), desc=f'STAGE {st}: Adapter removal', 
-             position=0, bar_format="{l_bar}{bar} |") as pbar:
+    # with tqdm(total=len(names), desc=f'STAGE {st}: Adapter removal', 
+    #          position=0, bar_format="{l_bar}{bar} |") as pbar:
+    for t in range(1):
         
         
         with multiprocessing.Pool(processes=args.num_threads) as pool:
@@ -64,11 +65,9 @@ def process_names_with_processes(names, args):
                 res = pool.apply_async(
                     all_in_one_wrapper,
                     args=(task,),
-                callback=lambda _: pbar.update(1)
+                # callback=lambda _: pbar.update(1)
                 )
                 results.append(res)
-            
-           
             success_count = 0
             for res in results:
                 if res.get():
@@ -81,6 +80,7 @@ def process_names_with_processes(names, args):
 
 
 if __name__ == "__main__":
+    
     parser = argparse.ArgumentParser(description='Process BAM and prefile files.')
     parser.add_argument('--bam_filename', type=str, required=True, help='Name of the BAM file')
     parser.add_argument('--bamview_file', type=str, required=False, help='Path of the bamview-new file',default="../data/bamview-new.csv")
