@@ -5,15 +5,17 @@ import pysam
 import pandas as pd
 import csv
 from sklearn.cluster import DBSCAN
-os.environ["ULTRALYTICS_SETTINGS_VERBOSE"] = "false"
-from ultralytics import YOLO
+import contextlib
+import io
+with contextlib.redirect_stdout(io.StringIO()):
+    from ultralytics import YOLO
 import cv2
 from tqdm import tqdm
 import torch
 
 def images_inference(image_dir, output_image_dir, output_csv_path,st):
    
-    # os.environ["ULTRALYTICS_SETTINGS_VERBOSE"] = "false"
+    
     # Load the pre-trained YOLO model
     device = torch.device("cuda:0")
     
