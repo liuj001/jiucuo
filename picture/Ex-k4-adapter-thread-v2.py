@@ -60,7 +60,7 @@ def file_filter(f):
 
 if __name__ == '__main__':
     local_time = strftime("%Y-%m-%d %H:%M:%S", localtime())
-    print(local_time)
+    print(f'[{local_time}]')
     split_cmd = f"samtools view -H {bam} | cut -f 2 | grep SN | cut -f 2 -d ':' > {txt_dir}/chr.txt"
     with open(log_file, "a") as log:
         os.system(split_cmd)
@@ -78,11 +78,13 @@ if __name__ == '__main__':
         stage_st=5
     else :
         stage_st=3
-    with tqdm(total=len(chr_l), desc=f'STAGE {stage_st}: Adapter detection', bar_format="{l_bar}{bar} |") as pbar:
+    # with tqdm(total=len(chr_l), desc=f'STAGE {stage_st}: Adapter detection', bar_format="{l_bar}{bar} |") as pbar:
+    print(f'STAGE {stage_st}: Adapter detection')
+    for t in range(1):
         with ProcessPoolExecutor(max_workers=thread) as executor:
             futures = [executor.submit(run_adapter, chr) for chr in chr_l]
             # 按任务完成顺序处理
             for future in as_completed(futures):  # 动态监听完成事件
                 result = future.result()         # 获取已完成任务的结果
-                pbar.update(1)                  # 立即更新进度条              # 立即更新进度条
+                # pbar.update(1)                  # 立即更新进度条             
 
