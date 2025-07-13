@@ -181,7 +181,7 @@ fi
 # 将标准输出和标准错误同时写入日志文件
 exec > >(tee "$output$log_file") 2>&1
 
-echo "[$(date '+%F %T')]"
+# echo "[$(date '+%F %T')]"
 
 echo -e "JiuCuo: PacBio HiFi read correction method using preassembled contigs based on deep image processing
 Jiwen Liu, Mingfei Pan, Hongbin Wang and Ergude Bao
@@ -229,6 +229,7 @@ validate_adapter_removal "$adapter_removal"
 validate_error_correction "$error_correction"
 validate_mutex_params "$error_correction" "$adapter_removal"
 
+echo "[$(date '+%F %T')]"
 echo "STAGE 1: Minimap2 alignment"
 # 运行 minimap2 和 samtools
 if [ ! -f "$output$bam" ]; then
@@ -281,7 +282,7 @@ if [ "$adapter_removal" -eq "$num" ]; then
   else
     cat $(find "$output$bam_csv_dir" -type f -name "*.csv") > "$output$bamview_file"
   fi
-  echo "[$(date '+%F %T')]"
+  # echo "[$(date '+%F %T')]"
   python yolo/process/run.py  --bam_filename "$output$bam_dir" \
                --bamview_file "$output$bamview_file"\
                --images_dir "$output$adapter" \
@@ -292,7 +293,7 @@ if [ "$adapter_removal" -eq "$num" ]; then
                --k_size "$k_size"\
                --adapter_output_dir "$output$adapter_out"\
                --error_correction "$error_correction"
-  # echo "[$(date '+%F %T')]"
+
   if [ "$error_correction" -eq 0 ]; then
     python correction/adapter_locate-v2.py -bam "$output$bam_f" -outfile "$outfile_ar" -infile "$reads" -csv "$output$adapter_out$process_files" -error_correction "$error_correction"
   else
@@ -301,3 +302,27 @@ if [ "$adapter_removal" -eq "$num" ]; then
 fi
 echo "[$(date '+%F %T')]"
 echo -e "\nDone! Please find the correction file(s) in output directory"
+mkdir -p "$output/tmp"
+if [ "$adapter_removal" -eq "1" ] && [ "$error_correction" -eq "1" ]; then
+    
+        find "$output" -maxdepth 1 \( -type f -o -type d \) \
+    ! -name "base_correction_adapter_removal.fastq" \
+    ! -name "tmp" \
+    ! -name "$output" \
+    -print0 | xargs -0 mv -t "$output/tmp"
+fi
+if [ "$adapter_removal" -eq "0" ] && [ "$error_correction" -eq "1" ]; then
+       find "$output" -maxdepth 1 \( -type f -o -type d \) \
+    ! -name "*.fastq" \
+    ! -name "tmp" \
+    ! -name "$output" \
+    -print0 | xargs -0 mv -t "$output/tmp"
+fi
+if [ "$adapter_removal" -eq "1" ] && [ "$error_correction" -eq "0" ]; then
+    find "$output" -maxdepth 1 \( -type f -o -type d \) \
+    ! -name "*.fastq" \
+    ! -name "tmp" \
+    ! -name "$output" \
+    -print0 | xargs -0 mv -t "$output/tmp"
+fi
+
