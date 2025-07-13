@@ -4,6 +4,7 @@ import pysam
 import argparse
 import gzip
 from tqdm import tqdm
+from time import *
 
 parser = argparse.ArgumentParser(description='adapter remove.')
 parser.add_argument('-outfile', type=str, help='fq with adapter', required=True)
@@ -52,6 +53,8 @@ else :
 
 # with tqdm(desc=f'STAGE {stage_st}: Adapter removal', bar_format="{l_bar}{bar} |") as pbar:
 # with tqdm(desc=f'STAGE {stage_st}: Adapter removal', bar_format="{l_bar}{bar} |") as pbar:
+local_time = strftime("%Y-%m-%d %H:%M:%S", localtime())
+print(f'[{local_time}]')
 print(f'STAGE {stage_st}: Adapter removal')
 for t in range(1):
     # pbar.total = 0  # 初始化总量为 0
