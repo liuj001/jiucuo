@@ -104,8 +104,8 @@ python yolo/finetune/train.py -b 1 -lr 0.01
 
 ### 7. Video demo
 
-This [video demo]( Video demo of JiuCuo) records the whole process from installation, running to obtaining the result on some tiny data.
-https://youtu.be/ifDQDG-ghio
+This [https://youtu.be/ifDQDG-ghio]( Video demo of JiuCuo) records the whole process from installation, running to obtaining the result on some tiny data.
+
 
 ### 8. Frequently asked questions
 
