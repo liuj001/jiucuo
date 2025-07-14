@@ -137,10 +137,15 @@ for t in range(1):
                                 lines[l_r-1] = bam.query_name + '_1\n'
                                 lines[l_r] = seq_l
                                 lines[l_r + 2] = qual_l
-                                lines[l_r+3] = bam.query_name + '_2\n'
-                                lines[l_r+4] = seq_r
-                                lines[l_r+5] = '+\n'
-                                lines[l_r+6] = qual_r
+                                # 插入新内容
+                                lines.insert(l_r+3, bam.query_name + '_2\n')
+                                lines.insert(l_r+4, seq_r)
+                                lines.insert(l_r+5, '+\n')
+                                lines.insert(l_r+6, qual_r)
+                                # lines[l_r+3] = bam.query_name + '_2\n'
+                                # lines[l_r+4] = seq_r
+                                # lines[l_r+5] = '+\n'
+                                # lines[l_r+6] = qual_r
 
                             # lines[l_r] = ''.join(str_list)
                             # lines[l_r + 2] = ''.join(qual_list)
