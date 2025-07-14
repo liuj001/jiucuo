@@ -29,7 +29,7 @@ pip install https://download.pytorch.org/whl/cu111/torch-1.8.1%2Bcu111-cp38-cp38
 conda install -c bioconda seqkit
 ```
 
-If the `huggingface-cli` commands succeed, DO NOT run this command.
+If the `huggingface-cli` commands fail, please run this command before them. If the `huggingface-cli` commands succeed, DO NOT run this command.
 ```sh
 export HF_ENDPOINT=https://hf-mirror.com
 ```
