@@ -70,7 +70,7 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
   Size of k-mer in adapter matching
 
 `-identity_value n (0.6)`
-  Identity value in adapter matching.
+  Identity value in adapter matching
 
 `-threads [int] (8)`
   Number of threads during correction
@@ -80,7 +80,8 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
 
 `-help`
 
-### 5. Outputs
+### 5. Output
+Depending on the command line, the output is one of the following.
 `base_correction.fastq`
 HiFi reads with base error correction
 
@@ -103,7 +104,8 @@ python yolo/finetune/train.py -b 1 -lr 0.01
 
 ### 7. Video demo
 
-This [video demo](xxx) records the whole process from installation, running to obtaining the result on some tiny data.
+This [video demo]( Video demo of JiuCuo) records the whole process from installation, running to obtaining the result on some tiny data.
+https://youtu.be/ifDQDG-ghio
 
 ### 8. Frequently asked questions
 
@@ -114,4 +116,6 @@ Please check and make sure the Linux system is Ubantu, the Internet is connected
 (2) Why is there an error during running?
 
 Please check and make sure the disk usage does not exceed the limit.
+### 9. Acknowledgement
+We specifically thank the anonymous Reviewer 3 of our manuscript submission to Briefings in Bioinformatics for the very constructive comments for improving the JiuCuo software.
 
