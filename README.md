@@ -29,7 +29,7 @@ pip install https://download.pytorch.org/whl/cu111/torch-1.8.1%2Bcu111-cp38-cp38
 conda install -c bioconda seqkit
 ```
 
-If the `huggingface-cli` commands fail, please run this command before them.
+If the `huggingface-cli` commands succeed, DO NOT run this command.
 ```sh
 export HF_ENDPOINT=https://hf-mirror.com
 ```
@@ -82,6 +82,7 @@ bash runJiuCuo.sh -reads hifi_reads.fastq -contigs primary_contigs.fasta -output
 
 ### 5. Output
 Depending on the command line, the output is one of the following.
+
 `base_correction.fastq`
 HiFi reads with base error correction
 
@@ -104,7 +105,7 @@ python yolo/finetune/train.py -b 1 -lr 0.01
 
 ### 7. Video demo
 
-This [Video demo of JiuCuo](https://youtu.be/ifDQDG-ghio) records the whole process from installation, running to obtaining the result on some tiny data.
+This [video demo](https://youtu.be/ifDQDG-ghio) records the whole process from installation, running to obtaining the result on some tiny data.
 
 
 ### 8. Frequently asked questions
